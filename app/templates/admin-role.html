@@ -1,0 +1,269 @@
+{% extends "base_with_sidebar.html" %}
+
+{% block header_btns %}
+    <a href="#" class="am-btn am-btn-secondary">
+        <i class="am-header-icon am-icon-user"></i>
+        <span class="am-header-nav-title">
+            账号
+        </span>
+    </a>
+    <a href="{{url_for('logout')}}" class="am-btn am-btn-secondary">
+        <i class="am-header-icon am-icon-power-off"></i>
+        <span class="am-header-nav-title">
+            退出
+        </span>
+    </a>
+{% endblock %}
+
+{% block content %}
+    <div class="admin-content-body">
+        <div class="am-cf am-padding am-padding-bottom-0">
+            <div class="am-fl am-cf"><strong class="am-text-primary am-text-lg">用户与权限</strong> / <small>权限</small></div>
+        </div>
+        <hr>
+        <div class="am-g">
+            <div class="am-u-sm-12">
+                <div class="am-tabs" data-am-tabs="{noSwipe: 1}" id="tabs">
+                    <ul class="am-tabs-nav am-nav am-nav-tabs">
+                        <li class="am-active"><a href="#tab1">角色</a></li>
+                        <li><a href="#tab2">权限</a></li>
+                    </ul>
+
+                    <div class="am-tabs-bd">
+                        <div class="am-tab-panel am-active" id="tab1">
+                            <div class="am-btn-group am-btn-group-xs">
+                                <button class="am-btn am-btn-default am-btn">新建角色</button>
+                            </div>
+                            <table class="am-table am-table-bordered am-table-radius am-table-striped am-table-centered" id="role_list">
+                                <thead>
+                                <tr>
+                                    <th class="table-id am-hide-sm-only">ID</th>
+                                    <th class="table-title">角色名称</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="am-tab-panel am-active" id="tab2">
+                            <div id="pad">
+                                <br>
+                                请先选择角色...
+                                <br>
+                            </div>
+                            <div id="privilege">
+                                <h3 id="selected_role"></h3>
+                                <div class="am-btn-group am-btn-group-xs">
+                                    <button class="am-btn am-btn-default am-btn">新建权限</button>
+                                </div>
+                                <table class="am-table am-table-bordered am-table-radius am-table-striped am-table-centered" id="privilege_list">
+                                    <thead>
+                                    <tr>
+                                        <th class="table-title">权限名称</th>
+                                        <th class="table-title">权限</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="am-modal am-modal-alert" tabindex="-1" id="errorModal">
+        <div class="am-modal-dialog">
+            <div class="am-modal-hd">错误</div>
+            <div class="am-modal-bd" id="error_msg">
+
+            </div>
+            <div class="am-modal-footer">
+                <span class="am-modal-btn">确定</span>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block css %}
+
+{% endblock %}
+
+{% block js %}
+<script language="JavaScript">
+    $(document).ready(function() {
+
+        //手工展开对应的主菜单
+        $("#sub-menu3").collapse('open')
+
+        load_role_list()
+
+        $("#privilege").hide()
+
+    });
+    function load_role_list(){
+        $.AMUI.progress.start();
+        console.log("start load role list");
+        jQuery.ajax({
+            url: "{{url_for('admin_role__role')}}",
+            dataType: "json",
+            data: {},
+            type: "GET",
+            timeout : timeout,
+            success: function(response) {
+                $.AMUI.progress.done();
+                console.log(response);
+                $("#role_list tbody").empty()
+                response.data.forEach(function(e){
+                    var row = $('<tr>'+
+                                '<td class="am-hide-sm-only role_id">'+e.id+'</td>'+
+                                '<td><a href="#" class="role_name">'+e.alias+'</a></td>'+
+                                '</tr>');
+                    $("#role_list tbody").append(row);
+                });
+                activeClickEvent();
+            },
+            error: function(XMLHttpRequest, textStatus, errorThrown) {
+                $.AMUI.progress.done();
+                //call failed
+                console.log("error");
+                $("#error_msg").html("网络连接异常，请稍后重试。");
+                $("#errorModal").modal("toggle");
+            }
+        });
+    }
+    function load_privilege_list(roleid){
+        $.AMUI.progress.start();
+        console.log("start load privilege list");
+        jQuery.ajax({
+            url: "{{url_for('admin_role__privilege')}}",
+            dataType: "json",
+            data: {"roleId": roleid},
+            type: "GET",
+            timeout : timeout,
+            success: function(response) {
+                $.AMUI.progress.done();
+                console.log(response);
+                $("#privilege_list tbody").empty()
+                response.data.forEach(function(e){
+                    t = '<tr>'+
+                        '<td>'+e.alias+'</td>'+
+                        '<td>'+
+                        '<div class="am-btn-group am-btn-group-xs">'+
+                        '<input type="hidden" class="privilege_name" value="'+e.name+'"/>'
+                    if(e.read){
+                        t+='<input type="hidden" class="read" value="1"/>'
+                        t+='<button class="am-btn am-btn-default am-btn-xs btn-read"><span class="am-icon-check-square-o am-icon-fw"></span> 读</button>'
+                    }else{
+                        t+='<input type="hidden" class="read" value="0"/>'
+                        t+='<button class="am-btn am-btn-default am-btn-xs btn-read"><span class="am-icon-square-o am-icon-fw"></span> 读</button>'
+                    }
+                    if(e.write){
+                        t+='<input type="hidden" class="write" value="1"/>'
+                        t+='<button class="am-btn am-btn-default am-btn-xs btn-write"><span class="am-icon-check-square-o am-icon-fw"></span> 写</button>'
+                    }else{
+                        t+='<input type="hidden" class="write" value="0"/>'
+                        t+='<button class="am-btn am-btn-default am-btn-xs btn-write"><span class="am-icon-square-o am-icon-fw"></span> 写</button>'
+                    }
+                    t +='</div>'+
+                        '</td>'+
+                        '</tr>'
+                    var row = $(t);
+                    $("#privilege_list tbody").append(row);
+                });
+                activeClickEvent2(roleid);
+            },
+            error: function(XMLHttpRequest, textStatus, errorThrown) {
+                $.AMUI.progress.done();
+                //call failed
+                console.log("error");
+                $("#error_msg").html("网络连接异常，请稍后重试。");
+                $("#errorModal").modal("toggle");
+            }
+        });
+    }
+    function activeClickEvent(){
+        $(".role_name").click(function(){
+            role_id = $(this).parent().parent().children('.role_id').html()
+            load_privilege_list(role_id)
+            $("#pad").hide()
+            $("#privilege").show()
+            $("#tabs").tabs('open',1)
+            $("#selected_role").html("角色["+$(this).html()+"]的权限:")
+        });
+    }
+    function activeClickEvent2(roleid){
+        $(".btn-read").click(function(){
+            privilege_name=$(this).parent().children('.privilege_name').val()
+            oread=$(this).parent().children('.read').val()
+            write=0
+            $(this).parent().children('.write').val(0)
+            $(this).parent().children('.btn-write').children('span').removeClass('am-icon-check-square-o')
+            $(this).parent().children('.btn-write').children('span').addClass('am-icon-square-o')
+            if(oread==1){
+                read=0
+                $(this).parent().children('.read').val(0)
+                $(this).children('span').removeClass('am-icon-check-square-o')
+                $(this).children('span').addClass('am-icon-square-o')
+            }else{
+                read=1
+                $(this).parent().children('.read').val(1)
+                $(this).children('span').removeClass('am-icon-square-o')
+                $(this).children('span').addClass('am-icon-check-square-o')
+            }
+            console.log("read:"+read+";write:"+write)
+            make_link(roleid, privilege_name, read, write)
+        });
+        $(".btn-write").click(function(){
+            privilege_name=$(this).parent().children('.privilege_name').val()
+            oread=$(this).parent().children('.read').val()
+            owrite=$(this).parent().children('.write').val()
+            if(owrite==1){
+                write=0
+                read=oread
+                $(this).parent().children('.write').val(0)
+                $(this).children('span').removeClass('am-icon-check-square-o')
+                $(this).children('span').addClass('am-icon-square-o')
+            }else{
+                write=1
+                read=1
+                $(this).parent().children('.read').val(1)
+                $(this).parent().children('.btn-read').children('span').removeClass('am-icon-square-o')
+                $(this).parent().children('.btn-read').children('span').addClass('am-icon-check-square-o')
+                $(this).parent().children('.write').val(1)
+                $(this).children('span').removeClass('am-icon-square-o')
+                $(this).children('span').addClass('am-icon-check-square-o')
+            }
+            console.log("read:"+read+";write:"+write)
+            make_link(roleid, privilege_name, read, write)
+        });
+    }
+    function make_link(roleid,privilege_name,read,write){
+        $.AMUI.progress.start();
+        console.log("start load privilege list");
+        jQuery.ajax({
+            url: "{{url_for('admin_role__privilege')}}",
+            dataType: "json",
+            data: {"roleId": roleid, "privilegeName":privilege_name, "read":read, "write":write},
+            type: "LINK",
+            timeout : timeout,
+            success: function(response) {
+                $.AMUI.progress.done();
+                console.log(response);
+
+            },
+            error: function(XMLHttpRequest, textStatus, errorThrown) {
+                $.AMUI.progress.done();
+                //call failed
+                console.log("error");
+                $("#error_msg").html("网络连接异常，请稍后重试。");
+                $("#errorModal").modal("toggle");
+            }
+        });
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,196 @@
+{% extends "base_with_sidebar.html" %}
+
+{% block header_btns %}
+    <a href="#" class="am-btn am-btn-secondary">
+        <i class="am-header-icon am-icon-user"></i>
+        <span class="am-header-nav-title">
+            账号
+        </span>
+    </a>
+    <a href="{{url_for('logout')}}" class="am-btn am-btn-secondary">
+        <i class="am-header-icon am-icon-power-off"></i>
+        <span class="am-header-nav-title">
+            退出
+        </span>
+    </a>
+{% endblock %}
+
+{% block content %}
+    <div class="admin-content-body">
+        <div class="am-cf am-padding am-padding-bottom-0">
+            <div class="am-fl am-cf"><strong class="am-text-primary am-text-lg">用户与权限</strong> / <small>用户</small></div>
+        </div>
+        <hr>
+        <div class="am-g">
+            <div class="am-u-sm-12">
+
+                <div class="am-btn-group am-btn-group">
+                    <button id="new" class="am-btn am-btn-default am-btn">新建用户</button>
+                </div>
+
+                <div class="am-input-group am-u-lg-3 am-u-sm-6">
+                    <input id="query" type="text" class="am-form-field" placeholder="用户名或Email">
+                    <span class="am-input-group-btn">
+                        <button id="filter" class="am-btn am-btn-default" type="button"><span class="am-icon-search"></span> </button>
+                    </span>
+                </div>
+
+                <table class="am-table am-table-striped am-table-hover table-main" id="user_list">
+                    <thead>
+                        <tr>
+                            <th class="table-id">ID</th>
+                            <th class="table-title">用户名</th>
+                            <th class="table-title">Email</th>
+                            <th class="table-title am-hide-sm-only">激活</th>
+                            <th class="table-title am-hide-sm-only">登陆数</th>
+                            <th class="table-set">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+                <div class="am-cf">
+                    共 <span id="total">0</span> 条记录
+                    <div class="am-fr" id="paging">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="am-modal am-modal-alert" tabindex="-1" id="errorModal">
+        <div class="am-modal-dialog">
+            <div class="am-modal-hd">错误</div>
+            <div class="am-modal-bd" id="error_msg">
+
+            </div>
+            <div class="am-modal-footer">
+                <span class="am-modal-btn">确定</span>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block css %}
+
+{% endblock %}
+
+{% block js %}
+<script language="JavaScript">
+    now = 1;
+    query = '';
+    $(document).ready(function() {
+
+        //手工展开对应的主菜单
+        $("#sub-menu3").collapse('open')
+
+        $('#new').click(function(){
+            console.log('new')
+        })
+
+        $('#filter').click(function(){
+            load_user_list(now,$('#query').val());
+        })
+
+        load_user_list(1,'');
+
+
+    });
+    function load_user_list(p,query){
+        now = p;
+        $.AMUI.progress.start();
+        console.log("start load user list");
+        jQuery.ajax({
+            url: "{{url_for('admin_user__user')}}",
+            dataType: "json",
+            data: {"p": p ,"query": query},
+            type: "GET",
+            timeout : timeout,
+            success: function(response) {
+                $.AMUI.progress.done();
+                console.log(response);
+                $("#total").html(response.data.total);
+                paging(response.data.prevNum, response.data.nextNum, response.data.total, response.data.perPage)
+                $("#user_list tbody").empty();
+                response.data.userList.forEach(function(e){
+                    var raw = $('<tr>'+
+                            '<td>'+e.id+'</td>'+
+                            '<td>'+e.name+'</td>'+
+                            '<td>'+e.email+'</td>'+
+                            '<td class="am-hide-sm-only">'+e.active+'</td>'+
+                            '<td class="am-hide-sm-only">'+e.login_count+'</td>'+
+                            '<td>'+
+                            '    <div class="am-btn-toolbar">'+
+                            '        <div class="am-btn-group am-btn-group-xs">'+
+                            '            <button class="edit am-btn am-btn-default am-btn-xs am-text-secondary"><span class="am-icon-pencil-square-o am-icon-fw"></span> 编辑</button>'+
+                            '            <button class="delete am-btn am-btn-default am-btn-xs am-text-danger am-hide-sm-only"><span class="am-icon-trash-o am-icon-fw"></span> 删除</button>'+
+                            '        </div>'+
+                            '    </div>'+
+                            '</td>'+
+                            '</tr>')
+                    $("#user_list tbody").append(raw)
+                });
+                activeClickEvent();
+            },
+            error: function(XMLHttpRequest, textStatus, errorThrown) {
+                $.AMUI.progress.done();
+                //call failed
+                console.log("error");
+                $("#error_msg").html("网络连接异常，请稍后重试。");
+                $("#errorModal").modal("toggle");
+            }
+        });
+    }
+    function paging(prevNum, nextNum, total, perPage){
+        totalPage = Math.ceil(total/perPage)
+        console.log(totalPage)
+        var paging = $('<ul class="am-pagination"></ul>')
+        if(prevNum>0){
+            paging.append('<li><a id="pre" href="#">«</a></li>')
+        }else{
+            paging.append('<li class="am-disabled"><a id="pre" href="#">«</a></li>')
+        }
+
+        offset = now - 2
+        offset = offset<(totalPage-4)?offset:(totalPage-4)
+        offset = offset>0?offset:1
+        showTotal = 5>totalPage?totalPage:5
+        for(var i=offset;i<offset+showTotal;i++){
+            if(i==now){
+                paging.append('<li class="am-active"><a class="paging" href="#">'+i+'</a></li>')
+            }else{
+                paging.append('<li><a class="paging" href="#">'+i+'</a></li>')
+            }
+        }
+
+        if(nextNum<=totalPage){
+            paging.append('<li><a id="next" href="#">»</a></li>')
+        }else{
+            paging.append('<li class="am-disabled"><a id="next" href="#">»</a></li>')
+        }
+        $("#paging").html(paging)
+    }
+    function activeClickEvent(){
+        $('.edit').click(function(){
+            console.log('edit')
+        })
+        $('.delete').click(function(){
+            console.log('delete')
+        })
+        $('#pre').click(function(){
+            console.log('pre')
+            load_user_list(now*1-1,query);
+        })
+        $('.paging').click(function(){
+            console.log('paging')
+            load_user_list($(this).html(),query);
+        })
+        $('#next').click(function(){
+            console.log('next')
+            load_user_list(now*1+1,query);
+        })
+
+    }
+</script>
+{% endblock %}

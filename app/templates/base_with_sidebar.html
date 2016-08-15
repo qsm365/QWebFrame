@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block header_btns %}
+<a href="#" class="am-btn am-btn-secondary">
+    <i class="am-header-icon am-icon-user"></i>
+    <span class="am-header-nav-title">
+        账号
+    </span>
+</a>
+<a href="{{url_for('logout')}}" class="am-btn am-btn-secondary">
+    <i class="am-header-icon am-icon-power-off"></i>
+    <span class="am-header-nav-title">
+        退出
+    </span>
+</a>
+{% endblock %}
+
+{% block sidebar %}
+
+<link rel="stylesheet" href="{{ url_for('static', filename='assets/css/admin.css') }}">
+
+<div class="am-cf admin-main">
+    <!-- sidebar start -->
+    <div class="admin-sidebar am-offcanvas" id="admin-offcanvas">
+    <div class="am-offcanvas-bar admin-offcanvas-bar">
+        <ul class="am-list admin-sidebar-list">
+            <li><a href="#"><span class="am-icon-home"></span> 首页</a></li>
+            <li class="admin-parent">
+                <a class="am-cf am-collapsed" data-am-collapse="{target: '#sub-menu1'}"><span class="am-icon-list"></span> 主菜单1 <span class="am-icon-angle-right am-fr am-margin-right"></span></a>
+                <ul class="am-list am-collapse admin-sidebar-sub" id="sub-menu1">
+                    <li><a href="#" class="am-cf"><span class="am-icon-check"></span> 子菜单1</a></li>
+                    <li><a href="#" class="am-cf"><span class="am-icon-check"></span> 子菜单2</a></li>
+                </ul>
+            </li>
+            <li class="admin-parent">
+                <a class="am-cf am-collapsed" data-am-collapse="{target: '#sub-menu2'}"><span class="am-icon-list"></span> 主菜单2 <span class="am-icon-angle-right am-fr am-margin-right"></span></a>
+                <ul class="am-list am-collapse admin-sidebar-sub" id="sub-menu2">
+                    <li><a href="#" class="am-cf"><span class="am-icon-check"></span> 子菜单1</a></li>
+                    <li><a href="#" class="am-cf"><span class="am-icon-check"></span> 子菜单2</a></li>
+                </ul>
+            </li>
+            <li class="admin-parent">
+                <a class="am-cf am-collapsed" data-am-collapse="{target: '#sub-menu3'}"><span class="am-icon-list"></span> 用户与权限 <span class="am-icon-angle-right am-fr am-margin-right"></span></a>
+                <ul class="am-list am-collapse admin-sidebar-sub" id="sub-menu3">
+                    <li><a href="{{url_for('admin_user')}}" class="am-cf"><span class="am-icon-users"></span> 用户</a></li>
+                    <li><a href="{{url_for('admin_role')}}" class="am-cf"><span class="am-icon-key"></span> 权限</a></li>
+                    <li><a href="{{url_for('login_his')}}" class="am-cf"><span class="am-icon-list-ol"></span> 登录记录</a></li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+    </div>
+    <!-- sidebar end -->
+    <!-- content start -->
+    <div class="admin-content">
+        {% block content %}
+
+        {% endblock %}
+    </div>
+    <!-- content end -->
+</div>
+
+<a href="#" class="am-icon-btn am-icon-th-list am-show-sm-only admin-menu" data-am-offcanvas="{target: '#admin-offcanvas'}"></a>
+{% endblock %}

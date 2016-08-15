@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+
+{% block header_btns %}
+<a href="{{url_for('login')}}" class="am-btn am-btn-secondary">
+    <span class="am-header-nav-title">
+        登录
+    </span>
+    <i class="am-header-icon am-icon-user"></i>
+</a>
+{% endblock %}
+
+{% block html %}
+    <br>
+    <br>
+    <div class="am-u-sm-8 am-u-sm-centered">
+        <section class="am-panel am-panel-default">
+            <div class="am-panel-bd">
+                <form action="#" class="am-form" id="form-with-tooltip">
+                    <fieldset>
+                        <legend>用户注册</legend>
+                        <div class="am-form-group">
+                            <label for="username">用户名：</label>
+                            <input type="text" id="username" minlength="3" data-foolish-msg="请输入正确的用户名"
+                               placeholder="输入用户名" required/>
+                        </div>
+                        <div class="am-form-group">
+                            <label for="password">密码：</label>
+                            <input type="password" id="password" minlength="6" data-foolish-msg="请输入密码(至少6位)"
+                               placeholder="输入密码" required/>
+                        </div>
+                        <div class="am-form-group">
+                            <label for="password">确认密码：</label>
+                            <input type="password" minlength="6" data-foolish-msg="输入密码不一致" data-equal-to="#password"
+                               placeholder="再次输入密码" required/>
+                        </div>
+                        <div class="am-form-group">
+                            <label for="username">邮箱：</label>
+                            <input type="email" id="email" minlength="3" data-foolish-msg="请输入正确的邮箱地址"
+                               placeholder="输入邮箱地址" required/>
+                        </div>
+
+                        <div class="am-u-sm-3 am-u-sm-centered">
+                            <button class="am-btn am-btn-secondary am-u-sm-centered" type="submit">提交</button>
+                        </div>
+                    </fieldset>
+                </form>
+            </div>
+        </section>
+    </div>
+
+    <div class="am-modal am-modal-alert" tabindex="-1" id="errorModal">
+        <div class="am-modal-dialog">
+            <div class="am-modal-hd">错误</div>
+            <div class="am-modal-bd" id="error_msg">
+
+            </div>
+            <div class="am-modal-footer">
+                <span class="am-modal-btn">确定</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="am-modal am-modal-alert" tabindex="-1" id="successModal">
+        <div class="am-modal-dialog">
+            <div class="am-modal-hd">注册成功</div>
+            <div class="am-modal-bd">
+                用户注册成功，快去登录吧
+            </div>
+            <div class="am-modal-footer">
+                <a href="{{url_for('login')}}" class="am-btn am-btn-link">确定</a>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block css %}
+<style>
+  #vld-tooltip {
+    position: absolute;
+    z-index: 1000;
+    padding: 5px 10px;
+    background: #F37B1D;
+    min-width: 150px;
+    color: #fff;
+    transition: all 0.15s;
+    box-shadow: 0 0 5px rgba(0,0,0,.15);
+    display: none;
+  }
+
+  #vld-tooltip:before {
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    width: 0;
+    height: 0;
+    margin-left: -8px;
+    content: "";
+    border-width: 0 8px 8px;
+    border-color: transparent transparent #F37B1D;
+    border-style: none inset solid;
+  }
+</style>
+{% endblock %}
+
+{% block js %}
+<script src="{{ url_for('static', filename='assets/js/sha-1.js') }}"></script>
+<script language="JavaScript">
+    $(document).ready(function() {
+        var $form = $('#form-with-tooltip');
+        var $tooltip = $('<div id="vld-tooltip">提示信息！</div>');
+        $tooltip.appendTo(document.body);
+
+        $form.validator({
+            submit: function() {
+                var formValidity = this.isFormValid();
+                if(formValidity ){
+                    // 验证成功的逻辑
+                    register();
+                }
+                return false;
+            }
+        });
+
+        var validator = $form.data('amui.validator');
+
+        $form.on('focusin focusout', '.am-form-error input', function(e) {
+            if (e.type === 'focusin') {
+                var $this = $(this);
+                var offset = $this.offset();
+                var msg = $this.data('foolishMsg') || validator.getValidationMessage($this.data('validity'));
+
+                $tooltip.text(msg).show().css({
+                    left: offset.left + 10,
+                    top: offset.top + $(this).outerHeight() + 10
+                });
+            } else {
+                $tooltip.hide();
+            }
+        });
+        $form.on('focusin focusout', '.am-form-success input', function(e) {
+            $tooltip.hide();
+        });
+    });
+
+    function register(){
+        $.AMUI.progress.start();
+        console.log("start add user");
+        var username = $("#username").val();
+        var password = hex_sha1($("#password").val());
+        var email = $("#email").val();
+        jQuery.ajax({
+            url: "{{url_for('create_user')}}",
+            dataType: "json",
+            data: { "username": username ,"password": password,"email": email},
+            type: "POST",
+            timeout : timeout,
+            success: function(response) {
+                $.AMUI.progress.done();
+                console.log(response);
+                if(response.result==2){
+                    $("#error_msg").html("用户名已存在，无法注册。");
+                    $("#errorModal").modal("toggle");
+                    return;
+                }
+                $("#successModal").modal("toggle");
+            },
+            error: function(XMLHttpRequest, textStatus, errorThrown) {
+                $.AMUI.progress.done();
+                //call failed
+                console.log("error");
+                $("#error_msg").html("网络连接异常，请稍后重试。");
+                $("#errorModal").modal("toggle");
+            }
+        });
+    }
+</script>
+{% endblock %}

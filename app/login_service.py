@@ -2,6 +2,7 @@
 
 import time
 from sqlalchemy import or_,and_
+import uuid
 
 from model import db
 from model.User import User
@@ -40,3 +41,12 @@ class LoginService:
         if u:
             u.login_count += 1
             db.session.commit()
+
+    @staticmethod
+    def give_token(username):
+        u = User.query.filter_by(name=username, active=1).first()
+        if u:
+            token=uuid.uuid4().hex
+            u.token = token
+            db.session.commit()
+            return token

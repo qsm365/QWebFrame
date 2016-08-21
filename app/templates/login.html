@@ -134,6 +134,7 @@
             success: function(response) {
                 $.AMUI.progress.done();
                 console.log(response);
+                window.location = "{{url_for('home')}}"
             },
             error: function(XMLHttpRequest, textStatus, errorThrown) {
                 $.AMUI.progress.done();

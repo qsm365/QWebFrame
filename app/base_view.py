@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-
 
-from flask import Blueprint,render_template,jsonify,request,redirect,url_for
+from flask import Blueprint,render_template,jsonify,request,redirect,url_for,make_response,session
 from . import app
 from user_service import UserService
 from role_service import RoleService
@@ -20,20 +20,18 @@ util = Util()
 
 @app.route('/login', methods=['GET'])
 def login():
-    #if already login
-    #  redirect to /
-    #else
-    #  show login.html
-    return render_template('login.html',title=u'登录')
+    if session.get('token') is not None:
+        redirect(url_for('home'))
+    else:
+        return render_template('login.html',title=u'登录')
 
 
 @app.route('/logout', methods=['GET'])
 def logout():
-    #if already login
-    #  redirect to /
-    #else
-    #  show login.html
-    return redirect(url_for('login'))
+    session.pop('token')
+    resp = make_response(redirect(url_for('login')))
+    resp.set_cookie('token', '', expires=0)
+    return resp
 
 
 @app.route('/authenticate', methods=['POST'])
@@ -45,10 +43,14 @@ def authenticate():
         login_ip=util.get_ip_addr()
         loginService.add_login_history(username,login_ip)
         loginService.add_user_login_count(username)
+        token = loginService.give_token(username)
         ret['result'] = 1
+        resp = make_response(jsonify(ret))
+        resp.set_cookie('token',token)
     else:
         ret['result'] = 0
-    return jsonify(ret), 200
+        resp = make_response(jsonify(ret))
+    return resp
 
 
 @app.route('/register', methods=['GET'])

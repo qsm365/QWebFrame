@@ -40,16 +40,24 @@ class UserService:
         return u
 
     @staticmethod
-    def del_user(self,id):
+    def del_user(id):
         u = User.query.get(id)
         db.session.delete(u)
         db.session.commit()
 
     @staticmethod
-    def mod_user(self, id, password, email):
+    def mod_user(id, password, email):
         u = User.query.get(id)
         if password:
             u.password = password
         if email:
             u.email = email
         db.session.commit()
+
+    @staticmethod
+    def check_token(token):
+        u = User.query.filter(User.token==token).all()
+        if u:
+            return True
+        else:
+            return False

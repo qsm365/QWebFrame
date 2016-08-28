@@ -19,8 +19,8 @@ class LoginService:
         u = User.query.filter_by(name=username, active=1).first()
         if u:
             if u.password == password:
-                return True
-        return False
+                return u.id
+        return
 
     @staticmethod
     def add_login_history(username, login_ip):

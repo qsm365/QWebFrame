@@ -160,9 +160,9 @@
                 if(response.result==2){
                     $("#error_msg").html("用户名已存在，无法注册。");
                     $("#errorModal").modal("toggle");
-                    return;
+                }else{
+                    $("#successModal").modal("toggle");
                 }
-                $("#successModal").modal("toggle");
             },
             error: function(XMLHttpRequest, textStatus, errorThrown) {
                 $.AMUI.progress.done();

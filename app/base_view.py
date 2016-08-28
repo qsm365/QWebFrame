@@ -21,7 +21,7 @@ util = Util()
 @app.route('/login', methods=['GET'])
 def login():
     if session.get('token') is not None:
-        redirect(url_for('home'))
+        return redirect(url_for('home'))
     else:
         return render_template('login.html',title=u'登录')
 
@@ -39,11 +39,14 @@ def authenticate():
     username = request.values.get('username')
     password = request.values.get('password')
     ret = {}
-    if loginService.authenticate(username, password):
+    user_id = loginService.authenticate(username, password)
+    if user_id:
         login_ip=util.get_ip_addr()
         loginService.add_login_history(username,login_ip)
         loginService.add_user_login_count(username)
         token = loginService.give_token(username)
+        session['token'] = token
+        session['userId'] = user_id
         ret['result'] = 1
         resp = make_response(jsonify(ret))
         resp.set_cookie('token',token)
@@ -114,9 +117,10 @@ def admin_user__user():
         username = request.values.get('username')
         password = request.values.get('password')
         email = request.values.get('email')
+        role_id = request.values.get('roleId')
         ret = {}
         if userService.check_user(username, password, email):
-            userService.add_user(username, password, email)
+            userService.add_user(username, password, email, role_id)
             ret['result'] = 1
         else:
             ret['result'] = 2
@@ -132,8 +136,9 @@ def admin_user__user():
         id = request.values.get('id')
         password = request.values.get('password')
         email = request.values.get('email')
+        role_id = request.values.get('roleId')
         if id and util.can_tune_to(id, int):
-            userService.mod_user(id, password, email)
+            userService.mod_user(id, password, email, role_id)
             ret = {}
             ret['result'] = 1
             return jsonify(ret)
@@ -147,12 +152,12 @@ def admin_role():
     return render_template('admin-role.html',title=u'权限管理')
 
 
-@app.route('/admin-role/role', methods=['PUT', 'DELETE', 'POST', 'GET', 'LINK', 'UNLINK'])
+@app.route('/admin-role/role', methods=['PUT', 'DELETE', 'POST', 'GET', 'LINK'])
 @login_required()
 @privilege('admin_role__role')
 def admin_role__role():
     if request.method == 'GET':
-        ret = {}
+        ret = dict()
         ret['result'] = 1
         role_list = roleService.get_role()
         ret['data'] = [e.serialize() for e in role_list]
@@ -161,9 +166,12 @@ def admin_role__role():
         name = request.values.get('name')
         alias = request.values.get('alias')
         if name and alias:
-            roleService.add_role(name,alias)
-            ret = {}
-            ret['result'] = 1
+            ret = dict()
+            if not roleService.is_exist(name):
+                roleService.add_role(name,alias)
+                ret['result'] = 1
+            else:
+                ret['result'] = 2
             return jsonify(ret)
     elif request.method == 'DELETE':
         id = request.values.get('id')
@@ -188,14 +196,6 @@ def admin_role__role():
             ret = dict()
             ret['result'] = 1
             return jsonify(ret)
-    elif request.method == 'UNLINK':
-        user_id = request.values.get('userId')
-        role_id = request.values.get('roleId')
-        if user_id and util.can_tune_to(user_id, int) and role_id and util.can_tune_to(role_id, int):
-            roleService.unlink_user_role(user_id, role_id)
-            ret = dict()
-            ret['result'] = 1
-            return jsonify(ret)
     return "error", 400
 
 
@@ -205,21 +205,28 @@ def admin_role__role():
 def admin_role__privilege():
     if request.method == 'GET':
         role_id = request.values.get('roleId')
-        if role_id and util.can_tune_to(role_id, int):
+        if role_id:
             ret = dict()
             ret['result'] = 1
-            privilege_list = privilegeService.get_privilege(int(role_id))
+            privilege_list = privilegeService.get_role_privileges(role_id)
+            ret['data'] = [e.serialize() for e in privilege_list]
+            return jsonify(ret)
+        else:
+            ret = dict()
+            ret['result'] = 1
+            privilege_list = privilegeService.get_privileges()
             ret['data'] = [e.serialize() for e in privilege_list]
             return jsonify(ret)
     elif request.method == 'PUT':
         name = unicode(request.values.get('name'))
         alias = unicode(request.values.get('alias'))
-        read = unicode(request.values.get('read'))
-        write = unicode(request.values.get('write'))
-        if name and alias and read and write:
-            privilegeService.add_privilege(name, alias, read == '1', write == '1')
+        if name and alias:
             ret = dict()
-            ret['result'] = 1
+            if not privilegeService.is_exist(name):
+                privilegeService.add_privilege(name, alias)
+                ret['result'] = 1
+            else:
+                ret['result'] = 2
             return jsonify(ret)
     elif request.method == 'DELETE':
         id = request.values.get('id')
@@ -238,11 +245,12 @@ def admin_role__privilege():
             return jsonify(ret)
     elif request.method == 'LINK':
         role_id = request.values.get('roleId')
-        privilege_name = request.values.get('privilegeName')
+        privilege_id = request.values.get('privilegeId')
         read = unicode(request.values.get('read'))
         write = unicode(request.values.get('write'))
-        if role_id and privilege_name and read and write and util.can_tune_to(role_id, int):
-            privilegeService.link_role_privilege(int(role_id), privilege_name, read == '1', write == '1')
+        if role_id and privilege_id and read and write and util.can_tune_to(role_id, int) \
+                and util.can_tune_to(privilege_id, int):
+            privilegeService.link_role_privilege(int(role_id), int(privilege_id), read == '1', write == '1')
             ret = dict()
             ret['result'] = 1
             return jsonify(ret)

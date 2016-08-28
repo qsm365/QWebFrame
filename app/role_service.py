@@ -4,6 +4,7 @@ from model import db
 from model.Role import Role
 from model.Privilege import Privilege
 from model.User import User
+from model.RolePrivilege import RolePrivilege
 
 
 class RoleService:
@@ -12,10 +13,20 @@ class RoleService:
         pass
 
     @staticmethod
+    def is_exist(role_name):
+        if Role.query.filter_by(name=role_name).first():
+            return True
+        else:
+            return False
+
+    @staticmethod
     def add_role(name, alias):
         r = Role(name=unicode(name), alias=unicode(alias))
-        ps = Privilege.query.filter(Privilege.read==False,Privilege.write==False).all()
-        r.privileges = ps
+        ps = Privilege.query.all()
+        for p in ps:
+            rp = RolePrivilege(rw=0, role_name=r.name, privilege_name=p.name)
+            rp.privilege = p
+            r.privileges.append(rp)
         db.session.add(r)
         db.session.commit()
 
@@ -40,19 +51,6 @@ class RoleService:
     @staticmethod
     def link_user_role(user_id, role_id):
         u = User.query.get(user_id)
-        rs = u.roles
         r = Role.query.get(role_id)
-        rs.append(r)
-        u.roles = rs
-        db.session.commit()
-
-    @staticmethod
-    def unlink_user_role(user_id, role_id):
-        u = User.query.get(user_id)
-        rs = u.roles
-        for i in range(len(rs)):
-            r = rs.pop()
-            if r.id != role_id:
-                rs.append(r)
-        u.roles = rs
+        u.role = r
         db.session.commit()

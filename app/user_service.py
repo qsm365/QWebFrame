@@ -4,11 +4,14 @@ from sqlalchemy import or_
 
 from model import db
 from model.User import User
+from model.Role import Role
 import re
 
 
 class UserService:
     email_check = re.compile(r'^(\w)+(\.\w+)*@(\w)+((\.\w+)+)$')
+
+    default_role_id = 2
 
     def __init__(self):
         pass
@@ -28,8 +31,11 @@ class UserService:
         return False
 
     @staticmethod
-    def add_user(username,password,email):
-        u = User(name=username,password=password,email=email,active=1,login_count=0)
+    def add_user(username, password, email, role_id=default_role_id):
+        u = User(name=username, password=password, email=email, active=1, login_count=0)
+        r = Role.query.get(role_id)
+        if r:
+            u.role = r
         db.session.add(u)
         db.session.commit()
 
@@ -46,18 +52,31 @@ class UserService:
         db.session.commit()
 
     @staticmethod
-    def mod_user(id, password, email):
+    def mod_user(id, password, email, role_id):
         u = User.query.get(id)
         if password:
             u.password = password
         if email:
             u.email = email
+        if role_id:
+            r = Role.query.get(role_id)
+            if r:
+                u.role = r
         db.session.commit()
 
     @staticmethod
     def check_token(token):
-        u = User.query.filter(User.token==token).all()
+        u = User.query.filter(User.token==token)
         if u:
-            return True
+            return u.first().id
         else:
-            return False
+            return
+
+    @staticmethod
+    def has_privilege(user_id, privilege_name, rw):
+        r = User.query.get(user_id).role
+        rp = r.privileges.filter_by(privilege_name=privilege_name).first()
+        if rp:
+            if rp.rw >= rw:
+                return True
+        return False

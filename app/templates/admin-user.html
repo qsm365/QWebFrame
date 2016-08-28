@@ -41,7 +41,7 @@
                             <th class="table-id">ID</th>
                             <th class="table-title">用户名</th>
                             <th class="table-title">Email</th>
-                            <th class="table-title am-hide-sm-only">激活</th>
+                            <th class="table-title am-hide-sm-only">角色</th>
                             <th class="table-title am-hide-sm-only">登陆数</th>
                             <th class="table-set">操作</th>
                         </tr>
@@ -70,6 +70,81 @@
             </div>
         </div>
     </div>
+
+    <div class="am-modal" tabindex="1" id="editUserModal">
+        <div class="am-modal-dialog">
+            <div class="am-modal-hd">编辑用户
+            <a href="javascript: void(0)" class="am-close am-close-spin" data-am-modal-close>&times;</a>
+            </div>
+            <form id="editUserForm" action="" class="am-form">
+            <div class="am-modal-bd">
+                    <fieldset>
+                        <div class="am-form-group">
+                            <input type="text" id="editUserName" minlength="3"
+                                   disabled="disabled"/>
+                        </div>
+                        <div class="am-form-group">
+                            <input type="password" id="editUserPassword"
+                                   placeholder="输入用户新密码，不输入则不修改"/>
+                        </div>
+                        <div class="am-form-group">
+                            <input type="password" id="editUserPassword2" data-equal-to="#editUserPassword"
+                                   placeholder="重复用户新密码"/>
+                        </div>
+                        <div class="am-form-group">
+                            <input type="text" id="editUserEmail" data-foolish-msg="请输入正确的用户邮箱"
+                                   placeholder="输入用户新邮箱，不输入则不修改"/>
+                        </div>
+                        <div class="am-form-group">
+                            <select id="editRoleId" required>
+                                <option value="">选择角色</option>
+                            </select>
+                            <span class="am-form-caret"></span>
+                        </div>
+                    </fieldset>
+                    <input type="hidden" id="editUserId"/>
+                    <button class="am-btn am-btn-default" type="submit">确定</button>
+            </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="am-modal" tabindex="1" id="createUserModal">
+        <div class="am-modal-dialog">
+            <div class="am-modal-hd">创建用户
+            <a href="javascript: void(0)" class="am-close am-close-spin" data-am-modal-close>&times;</a>
+            </div>
+            <form id="createUserForm" action="" class="am-form">
+            <div class="am-modal-bd">
+                    <fieldset>
+                        <div class="am-form-group">
+                            <input type="text" id="createUserName" minlength="3"
+                                   placeholder="输入用户名" required/>
+                        </div>
+                        <div class="am-form-group">
+                            <input type="password" id="createUserPassword" minlength="6"
+                                   placeholder="输入用户密码" required/>
+                        </div>
+                        <div class="am-form-group">
+                            <input type="password" id="createUserPassword2" minlength="6" data-equal-to="#createUserPassword"
+                                   placeholder="重复用户密码" required/>
+                        </div>
+                        <div class="am-form-group">
+                            <input type="text" id="createUserEmail" minlength="3" data-foolish-msg="请输入正确的用户邮箱"
+                                   placeholder="输入用户邮箱" required/>
+                        </div>
+                        <div class="am-form-group">
+                            <select id="createRoleId" required>
+                                <option value="">选择角色</option>
+                            </select>
+                            <span class="am-form-caret"></span>
+                        </div>
+                    </fieldset>
+                    <button class="am-btn am-btn-default" type="submit">确定</button>
+            </div>
+            </form>
+        </div>
+    </div>
 {% endblock %}
 
 {% block css %}
@@ -77,6 +152,7 @@
 {% endblock %}
 
 {% block js %}
+<script src="{{ url_for('static', filename='assets/js/sha-1.js') }}"></script>
 <script language="JavaScript">
     now = 1;
     query = '';
@@ -87,6 +163,14 @@
 
         $('#new').click(function(){
             console.log('new')
+            $('#createUserName').val('');
+            $('#createUserPassword').val('');
+            $('#createUserPassword2').val('');
+            $('#createUserEmail').val('');
+            $('#createRoleId').val('');
+            $("#createUserModal").modal({
+                dimmer:false
+            });
         })
 
         $('#filter').click(function(){
@@ -94,9 +178,113 @@
         })
 
         load_user_list(1,'');
+        load_role_list();
 
+        $('#editUserForm').validator({
+            submit: function() {
+                var formValidity = this.isFormValid();
+                if(formValidity ){
+                    if($('#editUserPassword').val()==$('#editUserPassword2').val()){
+                        // 验证成功的逻辑
+                        user_id = $('#editUserId').val();
+                        if($('#editUserPassword').val().length>0){
+                            user_pass = hex_sha1($('#editUserPassword').val());
+                        }else{
+                            user_pass = '';
+                        }
+                        user_email = $('#editUserEmail').val();
+                        role_id = $('#editRoleId').val();
+                        console.log("edit user:"+user_id+";"+user_pass+";"+user_email+";"+role_id);
+                        $('#editUserModal').modal('close');
+                        edit_user(user_id, user_pass, user_email, role_id);
+                    }else{
+                        $('#editUserPassword2').removeClass('am-field-valid');
+                        $('#editUserPassword2').parent().addClass('am-form-success');
+                        $('#editUserPassword2').addClass('am-field-error');
+                        $('#editUserPassword2').parent().addClass('am-form-error');
+                    }
+                }
+                return false;
+            }
+        });
 
+        $('#createUserForm').validator({
+            submit: function() {
+                var formValidity = this.isFormValid();
+                if(formValidity ){
+                    if($('#createUserPassword').val()==$('#createUserPassword2').val()){
+                        // 验证成功的逻辑
+                        user_name = $('#createUserName').val();
+                        user_pass = hex_sha1($('#createUserPassword').val());
+                        user_email = $('#createUserEmail').val();
+                        role_id = $('#createRoleId').val();
+                        $('#createUserModal').modal('close');
+                        create_user(user_name,user_pass,user_email,role_id);
+                    }else{
+                        $('#createUserPassword2').removeClass('am-field-valid');
+                        $('#createUserPassword2').parent().addClass('am-form-success');
+                        $('#createUserPassword2').addClass('am-field-error');
+                        $('#createUserPassword2').parent().addClass('am-form-error');
+                    }
+                }
+                return false;
+            }
+        });
     });
+    function edit_user(user_id, user_pass, user_email, role_id){
+        $.AMUI.progress.start();
+        console.log("start edit user");
+        jQuery.ajax({
+            url: "{{url_for('admin_user__user')}}",
+            dataType: "json",
+            data: {"id": user_id, "password":user_pass, "email":user_email,"roleId":role_id},
+            type: "POST",
+            timeout : timeout,
+            success: function(response) {
+                $.AMUI.progress.done();
+                console.log(response);
+                load_user_list(1,'');
+            },
+            error: function(XMLHttpRequest, textStatus, errorThrown) {
+                $.AMUI.progress.done();
+                //call failed
+                console.log("error");
+                $("#error_msg").html("网络连接异常，请稍后重试。");
+                $("#errorModal").modal({
+                    dimmer:false
+                });
+            }
+        });
+    }
+    function create_user(user_name,user_pass,user_email,role_id){
+        $.AMUI.progress.start();
+        console.log("start create user");
+        jQuery.ajax({
+            url: "{{url_for('admin_user__user')}}",
+            dataType: "json",
+            data: {"username": user_name, "password":user_pass, "email":user_email,"roleId":role_id},
+            type: "PUT",
+            timeout : timeout,
+            success: function(response) {
+                $.AMUI.progress.done();
+                console.log(response);
+                if(response.result==2){
+                    alert("已存在同名用户！");
+                }else{
+                    load_user_list(1,'');
+                }
+            },
+            error: function(XMLHttpRequest, textStatus, errorThrown) {
+                $.AMUI.progress.done();
+                //call failed
+                console.log("error");
+                $("#error_msg").html("网络连接异常，请稍后重试。");
+                $("#errorModal").modal({
+                    dimmer:false
+                });
+            }
+        });
+    }
     function load_user_list(p,query){
         now = p;
         $.AMUI.progress.start();
@@ -118,11 +306,14 @@
                             '<td>'+e.id+'</td>'+
                             '<td>'+e.name+'</td>'+
                             '<td>'+e.email+'</td>'+
-                            '<td class="am-hide-sm-only">'+e.active+'</td>'+
+                            '<td class="am-hide-sm-only">'+e.role_alias+'</td>'+
                             '<td class="am-hide-sm-only">'+e.login_count+'</td>'+
                             '<td>'+
                             '    <div class="am-btn-toolbar">'+
                             '        <div class="am-btn-group am-btn-group-xs">'+
+                            '            <input type="hidden" class="user_id" value="'+e.id+'"/>'+
+                            '            <input type="hidden" class="user_name" value="'+e.name+'"/>'+
+                            '            <input type="hidden" class="role_id" value="'+e.role_id+'"/>'+
                             '            <button class="edit am-btn am-btn-default am-btn-xs am-text-secondary"><span class="am-icon-pencil-square-o am-icon-fw"></span> 编辑</button>'+
                             '            <button class="delete am-btn am-btn-default am-btn-xs am-text-danger am-hide-sm-only"><span class="am-icon-trash-o am-icon-fw"></span> 删除</button>'+
                             '        </div>'+
@@ -138,7 +329,36 @@
                 //call failed
                 console.log("error");
                 $("#error_msg").html("网络连接异常，请稍后重试。");
-                $("#errorModal").modal("toggle");
+                $("#errorModal").modal({
+                    dimmer:false
+                });
+            }
+        });
+    }
+    function load_role_list(){
+        console.log("start load role list");
+        jQuery.ajax({
+            url: "{{url_for('admin_role__role')}}",
+            dataType: "json",
+            data: {},
+            type: "GET",
+            timeout : timeout,
+            success: function(response) {
+                console.log(response);
+                response.data.forEach(function(e){
+                    var row = $('<option value="'+e.id+'">'+e.alias+'</option>');
+                    $("#editRoleId").append(row);
+                    var row = $('<option value="'+e.id+'">'+e.alias+'</option>');
+                    $("#createRoleId").append(row);
+                });
+            },
+            error: function(XMLHttpRequest, textStatus, errorThrown) {
+                //call failed
+                console.log("error");
+                $("#error_msg").html("网络连接异常，请稍后重试。");
+                $("#errorModal").modal({
+                    dimmer:false
+                });
             }
         });
     }
@@ -173,10 +393,26 @@
     }
     function activeClickEvent(){
         $('.edit').click(function(){
-            console.log('edit')
+            user_id = $(this).parent().children('.user_id').val();
+            user_name = $(this).parent().children('.user_name').val();
+            role_id = $(this).parent().children('.role_id').val();
+            console.log('edit:'+user_id)
+            $('#editUserId').val(user_id)
+            $('#editUserName').val(user_name)
+            $('#editUserPassword').val('')
+            $('#editUserPassword2').val('')
+            $('#editUserEmail').val('')
+            $('#editRoleId').val(role_id)
+            $('#editUserModal').modal({
+                dimmer:false
+            })
         })
         $('.delete').click(function(){
-            console.log('delete')
+            if(confirm("确认删除吗？")){
+                user_id =$(this).parent().children('.user_id').val();
+                console.log('delete:'+user_id);
+                delete_user(user_id);
+            }
         })
         $('#pre').click(function(){
             console.log('pre')
@@ -190,7 +426,31 @@
             console.log('next')
             load_user_list(now*1+1,query);
         })
-
+    }
+    function delete_user(user_id){
+        $.AMUI.progress.start();
+        console.log("start delete user");
+        jQuery.ajax({
+            url: "{{url_for('admin_user__user')}}",
+            dataType: "json",
+            data: {"id": user_id},
+            type: "DELETE",
+            timeout : timeout,
+            success: function(response) {
+                $.AMUI.progress.done();
+                console.log(response);
+                load_user_list(1,'');
+            },
+            error: function(XMLHttpRequest, textStatus, errorThrown) {
+                $.AMUI.progress.done();
+                //call failed
+                console.log("error");
+                $("#error_msg").html("网络连接异常，请稍后重试。");
+                $("#errorModal").modal({
+                    dimmer:false
+                });
+            }
+        });
     }
 </script>
 {% endblock %}

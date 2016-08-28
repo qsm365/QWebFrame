@@ -17,8 +17,8 @@ class User(db.Model):
     email = db.Column(db.String(255))
     token = db.Column(db.String(255))
     login_count = db.Column(db.Integer)
-    roles = db.relationship('Role', secondary=role_user,
-                            backref=db.backref('users', lazy='dynamic'))
+    role_id = db.Column(db.Integer, db.ForeignKey('role.id'))
+    role = db.relationship("Role")
 
     def serialize(self):
         """Return object data in easily serializeable format"""
@@ -27,5 +27,8 @@ class User(db.Model):
             'name': self.name,
             'active': self.active,
             'email' : self.email,
-            'login_count' : self.login_count
+            'login_count' : self.login_count,
+            'role_id': self.role_id,
+            'role_name': self.role.name if self.role else None,
+            'role_alias': self.role.alias if self.role else None
         }

@@ -13,7 +13,7 @@ class LoginHistory(db.Model):
         """Return object data in easily serializeable format"""
         return {
             'id': self.id,
-            'login_at': datetime.datetime.strftime(self.login_at,'%Y-%m-%d %H:%M:%S'),
+            'login_at': datetime.datetime.strftime(self.login_at, '%Y-%m-%d %H:%M:%S'),
             'name': self.name,
             'login_ip': self.login_ip
         };

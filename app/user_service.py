@@ -46,14 +46,14 @@ class UserService:
         return u
 
     @staticmethod
-    def del_user(id):
-        u = User.query.get(id)
+    def del_user(user_id):
+        u = User.query.get(user_id)
         db.session.delete(u)
         db.session.commit()
 
     @staticmethod
-    def mod_user(id, password, email, role_id):
-        u = User.query.get(id)
+    def mod_user(user_id, password, email, role_id):
+        u = User.query.get(user_id)
         if password:
             u.password = password
         if email:

@@ -159,7 +159,7 @@
     $(document).ready(function() {
 
         //手工展开对应的主菜单
-        $("#sub-menu3").collapse('open')
+        $("#sub-menu-user").collapse('open')
 
         $('#new').click(function(){
             console.log('new')
@@ -169,6 +169,7 @@
             $('#createUserEmail').val('');
             $('#createRoleId').val('');
             $("#createUserModal").modal({
+                width: 400,
                 dimmer:false
             });
         })
@@ -404,6 +405,7 @@
             $('#editUserEmail').val('')
             $('#editRoleId').val(role_id)
             $('#editUserModal').modal({
+                width: 400,
                 dimmer:false
             })
         })

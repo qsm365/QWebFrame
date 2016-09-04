@@ -3,6 +3,9 @@
 from flask import request
 import datetime
 import re
+import pytz
+
+from . import app
 
 
 class Util:
@@ -52,3 +55,9 @@ class Util:
         except:
             return None
         return None
+
+    @staticmethod
+    def utc2local(d):
+        local_tz = pytz.timezone(app.config.get('TIMEZONE'))
+        local_dt = d.replace(tzinfo=pytz.utc).astimezone(local_tz)
+        return local_tz.normalize(local_dt)

@@ -33,15 +33,15 @@
                 </ul>
             </li>
             <li class="admin-parent">
-                <a class="am-cf am-collapsed" data-am-collapse="{target: '#sub-menu2'}"><span class="am-icon-list"></span> 主菜单2 <span class="am-icon-angle-right am-fr am-margin-right"></span></a>
-                <ul class="am-list am-collapse admin-sidebar-sub" id="sub-menu2">
-                    <li><a href="#" class="am-cf"><span class="am-icon-check"></span> 子菜单1</a></li>
-                    <li><a href="#" class="am-cf"><span class="am-icon-check"></span> 子菜单2</a></li>
+                <a class="am-cf am-collapsed" data-am-collapse="{target: '#sub-menu-task'}"><span class="am-icon-list"></span> 定时任务 <span class="am-icon-angle-right am-fr am-margin-right"></span></a>
+                <ul class="am-list am-collapse admin-sidebar-sub" id="sub-menu-task">
+                    <li><a href="{{url_for('task_config')}}" class="am-cf"><span class="am-icon-bell"></span> 任务配置</a></li>
+                    <li><a href="{{url_for('task_his')}}" class="am-cf"><span class="am-icon-calendar"></span> 执行记录</a></li>
                 </ul>
             </li>
             <li class="admin-parent">
-                <a class="am-cf am-collapsed" data-am-collapse="{target: '#sub-menu3'}"><span class="am-icon-list"></span> 用户与权限 <span class="am-icon-angle-right am-fr am-margin-right"></span></a>
-                <ul class="am-list am-collapse admin-sidebar-sub" id="sub-menu3">
+                <a class="am-cf am-collapsed" data-am-collapse="{target: '#sub-menu-user'}"><span class="am-icon-list"></span> 用户与权限 <span class="am-icon-angle-right am-fr am-margin-right"></span></a>
+                <ul class="am-list am-collapse admin-sidebar-sub" id="sub-menu-user">
                     <li><a href="{{url_for('admin_user')}}" class="am-cf"><span class="am-icon-users"></span> 用户</a></li>
                     <li><a href="{{url_for('admin_role')}}" class="am-cf"><span class="am-icon-key"></span> 权限</a></li>
                     <li><a href="{{url_for('login_his')}}" class="am-cf"><span class="am-icon-list-ol"></span> 登录记录</a></li>

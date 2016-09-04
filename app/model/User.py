@@ -3,11 +3,6 @@
 from . import db
 from Role import Role
 
-role_user = db.Table('role_user',
-                       db.Column('user_id', db.Integer(), db.ForeignKey('user.id')),
-                       db.Column('role_id', db.Integer(), db.ForeignKey('role.id')))
-
-
 #用户
 class User(db.Model):
     id = db.Column(db.Integer,primary_key=True)

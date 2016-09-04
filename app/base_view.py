@@ -6,16 +6,47 @@ from user_service import UserService
 from role_service import RoleService
 from privilege_service import PrivilegeService
 from login_service import LoginService
+from task_pool import TaskPool
+from scheduler_service import SchedulerService
 from util import Util
 from decorator.user import login_required,privilege
+from decorator.task import celery
 
 baseProfile = Blueprint('baseProfile', __name__)
 userService = UserService()
 roleService = RoleService()
 privilegeService = PrivilegeService()
 loginService = LoginService()
+taskPool = TaskPool()
+schedulerService = SchedulerService()
 perPage = 10
 util = Util()
+
+
+
+@app.route('/test', methods=['GET','POST'])
+def test():
+    result = taskPool.test2.delay(1, 2)
+    print result.id
+    #result.wait()
+    return 'ok', 200
+
+
+@app.route('/test2', methods=['GET','POST'])
+def test2():
+    res_id = request.values.get('res_id')
+    print res_id
+    result = celery.AsyncResult(res_id)
+    print result.state
+    print result.get(timeout=10)
+    #result.wait()
+    return 'ok', 200
+
+
+@app.route('/test3', methods=['GET','POST'])
+def test3():
+    schedulerService.interval()
+    return 'ok', 200
 
 
 @app.route('/login', methods=['GET'])
@@ -206,11 +237,12 @@ def admin_role__privilege():
     if request.method == 'GET':
         role_id = request.values.get('roleId')
         if role_id:
-            ret = dict()
-            ret['result'] = 1
-            privilege_list = privilegeService.get_role_privileges(role_id)
-            ret['data'] = [e.serialize() for e in privilege_list]
-            return jsonify(ret)
+            if util.can_tune_to(role_id, int):
+                ret = dict()
+                ret['result'] = 1
+                privilege_list = privilegeService.get_role_privileges(role_id)
+                ret['data'] = [e.serialize() for e in privilege_list]
+                return jsonify(ret)
         else:
             ret = dict()
             ret['result'] = 1
@@ -284,4 +316,77 @@ def login_his__his():
         data['perPage'] = perPage
         ret['data'] = data
         return jsonify(ret)
-    return "error",400
+    return "error", 400
+
+
+@app.route('/task-config', methods=['GET'])
+@login_required()
+@privilege('task_config')
+def task_config():
+    return render_template('task-config.html', title=u'任务配置')
+
+
+@app.route('/task-config/schedule', methods=['GET'])
+@login_required()
+@privilege('task_config__schedule')
+def task_config__schedule():
+    if request.method=='GET':
+        ret = dict()
+        ret['result'] = 1
+        ss = schedulerService.get_schedule_list()
+        ret['data'] = [e.serialize() for e in ss]
+        return jsonify(ret)
+
+
+@app.route('/task-config/task', methods=['GET'])
+@login_required()
+@privilege('task_config__task')
+def task_config__task():
+    if request.method=='GET':
+        ret = dict()
+        ret['result'] = 1
+        ts = schedulerService.get_tasks()
+        ret['data'] = ts
+        return jsonify(ret)
+
+
+@app.route('/task-his', methods=['GET'])
+@login_required()
+@privilege('task_his')
+def task_his():
+    return render_template('task-his.html', title=u'执行记录')
+
+
+@app.route('/task-his/his', methods=['GET'])
+@login_required()
+@privilege('task_his__his')
+def task_his__his():
+    sh_id = request.values.get('id')
+    if sh_id:
+        if util.can_tune_to(sh_id, int):
+            td = schedulerService.get_task_detail(int(sh_id))
+            ret = dict()
+            if td:
+                ret['result'] = 1
+                ret['data'] = td
+            else:
+                ret['result'] = 2
+            return jsonify(ret)
+    else:
+        query = request.values.get('query', '')
+        start_at = util.check_date_str(request.values.get('startAt'))
+        page = request.values.get('p', 1)
+        if util.can_tune_to(page, int):
+            pager = schedulerService.get_task_history(query, start_at).paginate(int(page), perPage, False)
+            ret = dict()
+            ret['result'] = 1
+            his_list = pager.items
+            data = dict()
+            data['hisList'] = [e.serialize() for e in his_list]
+            data['prevNum'] = pager.prev_num
+            data['nextNum'] = pager.next_num
+            data['total'] = pager.total
+            data['perPage'] = perPage
+            ret['data'] = data
+            return jsonify(ret)
+    return "error", 400

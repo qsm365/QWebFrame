@@ -70,6 +70,7 @@
                                 <br>
                                 请先选择角色...
                                 <br>
+                                <br>
                             </div>
                             <div id="rp">
                                 <h3 id="selected_role"></h3>
@@ -227,7 +228,7 @@
     $(document).ready(function() {
 
         //手工展开对应的主菜单
-        $("#sub-menu3").collapse('open');
+        $("#sub-menu-user").collapse('open');
 
         load_role_list();
         load_privilege_list();
@@ -236,6 +237,7 @@
             $("#createRoleName").val('');
             $("#createRoleAlias").val('');
             $("#createRoleModal").modal({
+                width: 400,
                 dimmer:false
             });
         });
@@ -256,6 +258,7 @@
             $("#createPrivilegeName").val('');
             $("#createPrivilegeAlias").val('');
             $("#createPrivilegeModal").modal({
+                width: 400,
                 dimmer:false
             });
         });
@@ -491,6 +494,7 @@
             $('#editRoleName').val(role_name);
             $('#editRoleAlias').val(role_alias);
             $("#editRoleModal").modal({
+                width: 400,
                 dimmer:false
             })
         });
@@ -512,6 +516,7 @@
             $('#editPrivilegeName').val(privilege_name);
             $('#editPrivilegeAlias').val(privilege_alias);
             $("#editPrivilegeModal").modal({
+                width: 400,
                 dimmer:false
             })
         });

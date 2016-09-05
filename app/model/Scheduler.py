@@ -109,10 +109,39 @@ class DatabaseSchedulerEntry(db.Model):
             'name': self.name,
             'task': self.task,
             'run_type': 'crontab' if self.crontab_id else 'interval',
-            'enable': 'Yes' if self.enabled == 1 else 'No',
+            'enabled': 'Yes' if self.enabled == 1 else 'No',
             'run_count': self.total_run_count,
             'last_update': datetime.datetime.strftime(Util.utc2local(self.date_changed), '%Y-%m-%d %H:%M:%S')
         }
+
+    def detail(self):
+        if self.crontab_id:
+            return {
+                'id': self.id,
+                'name': self.name,
+                'task': self.task,
+                'args': self.arguments,
+                'kwargs': self.keyword_arguments,
+                'enabled': self.enabled,
+                'run_type': 'crontab' if self.crontab_id else 'interval',
+                'minute': self.crontab.minute,
+                'hour': self.crontab.hour,
+                'day_of_week': self.crontab.day_of_week,
+                'day_of_month': self.crontab.day_of_month,
+                'month_of_year': self.crontab.month_of_year,
+            }
+        else:
+            return {
+                'id': self.id,
+                'name': self.name,
+                'task': self.task,
+                'args': self.arguments,
+                'kwargs': self.keyword_arguments,
+                'enabled': self.enabled,
+                'run_type': 'crontab' if self.crontab_id else 'interval',
+                'every': self.interval.every,
+                'period': self.interval.period
+            }
 
     @property
     def args(self):

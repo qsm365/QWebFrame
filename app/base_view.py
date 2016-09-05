@@ -45,8 +45,7 @@ def test2():
 
 @app.route('/test3', methods=['GET','POST'])
 def test3():
-    schedulerService.interval()
-    return 'ok', 200
+    return jsonify(schedulerService.get_schedule_detail(2))
 
 
 @app.route('/login', methods=['GET'])
@@ -326,16 +325,55 @@ def task_config():
     return render_template('task-config.html', title=u'任务配置')
 
 
-@app.route('/task-config/schedule', methods=['GET'])
+@app.route('/task-config/schedule', methods=['GET', 'PUT', 'DELETE'])
 @login_required()
 @privilege('task_config__schedule')
 def task_config__schedule():
-    if request.method=='GET':
-        ret = dict()
-        ret['result'] = 1
-        ss = schedulerService.get_schedule_list()
-        ret['data'] = [e.serialize() for e in ss]
-        return jsonify(ret)
+    if request.method == 'GET':
+        sid = request.values.get('id')
+        if sid and Util.can_tune_to(sid, int):
+            ret = dict()
+            ret['result'] = 1
+            ret['data'] = schedulerService.get_schedule_detail(int(sid))
+            return jsonify(ret)
+        else:
+            ret = dict()
+            ret['result'] = 1
+            ss = schedulerService.get_schedule_list()
+            ret['data'] = [e.serialize() for e in ss]
+            return jsonify(ret)
+    elif request.method == 'DELETE':
+        sid = request.values.get('id')
+        if sid and Util.can_tune_to(sid, int):
+            ret = dict()
+            ret['result'] = 1
+            schedulerService.del_schedule(int(sid))
+            return jsonify(ret)
+    elif request.method == 'PUT':
+        name = request.values.get('name')
+        task = request.values.get('task')
+        args = request.values.get('args')
+        kwargs = request.values.get('kwargs')
+        enabled = request.values.get('enabled')
+        every = request.values.get('every')
+        period = request.values.get('period')
+        minute = request.values.get('minute')
+        hour = request.values.get('hour')
+        day_of_week = request.values.get('day_of_week')
+        day_of_month = request.values.get('day_of_month')
+        month_of_year = request.values.get('month_of_year')
+        if every and Util.can_tune_to(every, int):
+            ret = dict()
+            ret['result'] = 1
+            schedulerService.add_schedule(name, task, args, kwargs, enabled, every=every, period=period)
+            return jsonify(ret)
+        elif minute or hour or day_of_week or day_of_month or month_of_year:
+            ret = dict()
+            ret['result'] = 1
+            schedulerService.add_schedule(name, task, args, kwargs, enabled, minute=minute, hour=hour,
+                                    day_of_week=day_of_week, day_of_month=day_of_month, month_of_year=month_of_year)
+            return jsonify(ret)
+    return "error", 400
 
 
 @app.route('/task-config/task', methods=['GET'])
@@ -345,9 +383,10 @@ def task_config__task():
     if request.method=='GET':
         ret = dict()
         ret['result'] = 1
-        ts = schedulerService.get_tasks()
+        ts = schedulerService.get_task_list()
         ret['data'] = ts
         return jsonify(ret)
+    return "error", 400
 
 
 @app.route('/task-his', methods=['GET'])
@@ -364,7 +403,7 @@ def task_his__his():
     sh_id = request.values.get('id')
     if sh_id:
         if util.can_tune_to(sh_id, int):
-            td = schedulerService.get_task_detail(int(sh_id))
+            td = schedulerService.get_task_history_detail(int(sh_id))
             ret = dict()
             if td:
                 ret['result'] = 1

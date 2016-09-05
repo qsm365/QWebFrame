@@ -13,45 +13,50 @@ class SchedulerService:
     def __init__(self):
         pass
 
-    def crontab(self):
+    @staticmethod
+    def add_schedule(name, task, args, kwargs, enabled, every=None, period=None, minute=None, hour=None, day_of_week=None,
+               day_of_month=None, month_of_year=None):
         dse = DatabaseSchedulerEntry()
-        dse.name = 'crontab task'
-        dse.task = 'app.task_pool.test'
-        dse.arguments = '[1,2]'  # json string
-        dse.keyword_arguments = '{}'  # json string
-
-        # crontab defaults to run every minute
-        dse.crontab = CrontabSchedule()
-
-        db.session.add(dse)
-        db.session.commit()
-
-    def interval(self):
-        dse = DatabaseSchedulerEntry()
-        dse.name = 'interval task'
-        dse.task = 'app.task_pool.test'
-        dse.arguments = '[1,2]'  # json string
-        dse.keyword_arguments = '{}'  # json string
-
-        # crontab defaults to run every minute
-        dse.interval = IntervalSchedule(every=10, period='seconds')
-
+        dse.name = name
+        dse.task = task
+        if not args:
+            args='[]'
+        if not kwargs:
+            kwargs='{}'
+        dse.arguments = args
+        dse.keyword_arguments = kwargs
+        dse.enabled=enabled
+        if every and period:
+            dse.interval = IntervalSchedule(every=every, period=period)
+        elif minute or hour or day_of_week or day_of_month or month_of_year:
+            dse.crontab = CrontabSchedule(minute=minute, hour=hour, day_of_week=day_of_week, day_of_month=day_of_month, month_of_year=month_of_year)
         db.session.add(dse)
         db.session.commit()
 
     @staticmethod
-    def get_tasks():
+    def del_schedule(sid):
+        dse = DatabaseSchedulerEntry.query.get(sid)
+        db.session.delete(dse)
+        db.session.commit()
+
+    @staticmethod
+    def get_schedule_list():
+        ss = DatabaseSchedulerEntry.query.all()
+        return ss
+
+    @staticmethod
+    def get_schedule_detail(sid):
+        dse = DatabaseSchedulerEntry.query.get(sid)
+        return dse.detail()
+
+    @staticmethod
+    def get_task_list():
         ret = list()
         for t in celery.tasks:
             n = str(t)
             if n[0:6]!='celery':
                 ret.insert(0, str(t))
         return ret
-
-    @staticmethod
-    def get_schedule_list():
-        ss = DatabaseSchedulerEntry.query.all()
-        return ss
 
     @staticmethod
     def get_task_history(query, start_at):
@@ -63,7 +68,7 @@ class SchedulerService:
         return sh
 
     @staticmethod
-    def get_task_detail(sh_id):
+    def get_task_history_detail(sh_id):
         ret = dict()
         sh = SchedulerHistory.query.get(sh_id)
         if sh:

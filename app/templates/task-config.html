@@ -73,6 +73,14 @@
                             <select data-am-selected="{btnWidth: '100%',placeholder:'选择任务'}" id="createScheduleTask">
                             </select>
                         </div>
+                        <div class="am-form-group">
+                            <input type="text" id="createScheduleArgs" minlength="3" data-foolish-msg="请输入正确的args参数"
+                                   placeholder="输入args(json格式)" required/>
+                        </div>
+                        <div class="am-form-group">
+                            <input type="text" id="createScheduleKwargs" minlength="3" data-foolish-msg="请输入正确的kwargs参数"
+                                   placeholder="输入kwargs(json格式)" required/>
+                        </div>
                         <div class="am-panel am-panel-secondary">
                             <div class="am-panel-hd" style="padding:0px;">
                                 <select data-am-selected="{btnWidth: '100%'}" id="runTypeSelect">
@@ -125,14 +133,14 @@
                         </div>
                         <div class="am-u-sm-3">
                             <label class="am-checkbox">
-                                <input type="checkbox" checked="checked" value="" data-am-ucheck checked> 有效
+                                <input id="createScheduleEnabled" type="checkbox" checked="checked" value="" data-am-ucheck checked> 有效
                             </label>
                         </div>
                     </fieldset>
                 </form>
             </div>
             <div class="am-modal-footer">
-                <span class="am-modal-btn" id="createRole">确定</span>
+                <span class="am-modal-btn" id="createScheduleCommit">确定</span>
             </div>
         </div>
     </div>
@@ -169,10 +177,63 @@
                 $("#intervalPannel").hide();
             }
         });
+
+        $("#createScheduleCommit").click(function(){
+            name=$('#createScheduleName').val();
+            task=$('#createScheduleTask').val();
+            args=$('#createScheduleArgs').val();
+            kwargs=$('#createScheduleKwargs').val();
+            if($('#createScheduleEnabled').is(':checked')){
+                enabled=1
+            }else{
+                enabled=0
+            }
+            if($('#runTypeSelect').val()=='interval'){
+                every=$('#createScheduleEvery').val();
+                period=$('#createSchedulePeriod').val();
+                minute=null;
+                hour=null;
+                day_of_week=null;
+                day_of_month=null;
+                month_of_year=null;
+            }else if ($('#runTypeSelect').val()=='crontab'){
+                every=null;
+                period=null;
+                minute=$('#createScheduleCrontab1').val();
+                hour=$('#createScheduleCrontab2').val();
+                day_of_week=$('#createScheduleCrontab3').val();
+                day_of_month=$('#createScheduleCrontab4').val();
+                month_of_year=$('#createScheduleCrontab5').val();
+            }
+            create_schedule(name,task,args,kwargs,enabled,every,period,minute,hour,day_of_week,day_of_month,month_of_year)
+        });
     });
-    function load_schedule(){
+    function create_schedule(name,task,args,kwargs,enabled,every,period,minute,hour,day_of_week,day_of_month,month_of_year){
         $.AMUI.progress.start();
         console.log("start load user list");
+        jQuery.ajax({
+            url: "{{url_for('task_config__schedule')}}",
+            dataType: "json",
+            data: {'name':name,'task':task,'args':args,'kwargs':kwargs,'enabled':enabled,'every':every,'period':period,'minute':minute,'hour':hour,'day_of_week':day_of_week,'day_of_month':day_of_month,'month_of_year':month_of_year},
+            type: "PUT",
+            timeout : timeout,
+            success: function(response) {
+                $.AMUI.progress.done();
+                console.log(response);
+                load_schedule();
+            },
+            error: function(XMLHttpRequest, textStatus, errorThrown) {
+                $.AMUI.progress.done();
+                //call failed
+                console.log("error");
+                $("#error_msg").html("网络连接异常，请稍后重试。");
+                $("#errorModal").modal("toggle");
+            }
+        });
+    }
+    function load_schedule(){
+        $.AMUI.progress.start();
+        console.log("start load schedule list");
         jQuery.ajax({
             url: "{{url_for('task_config__schedule')}}",
             dataType: "json",
@@ -189,7 +250,7 @@
                                 '<td class=""><a href="#" class="name">'+e.name+'</a></td>'+
                                 '<td class="">'+e.task+'</td>'+
                                 '<td class="">'+e.run_type+'</td>'+
-                                '<td class="am-hide-sm-only">'+e.enable+'</td>'+
+                                '<td class="am-hide-sm-only">'+e.enabled+'</td>'+
                                 '<td class="am-hide-sm-only">'+e.run_count+'</td>'+
                                 '<td class="am-hide-sm-only">'+e.last_update+'</td>'+
                                 '</tr>')

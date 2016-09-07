@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 
 import time
-from sqlalchemy import or_,and_
+from sqlalchemy import or_,and_,desc
 
 from model import db
 from model.Scheduler import DatabaseSchedulerEntry,CrontabSchedule,IntervalSchedule,SchedulerHistory,Task
@@ -40,8 +40,30 @@ class SchedulerService:
         db.session.commit()
 
     @staticmethod
+    def mod_schedule(sid, name, task, args, kwargs, enabled, every=None, period=None, minute=None, hour=None, day_of_week=None,
+               day_of_month=None, month_of_year=None):
+        dse = DatabaseSchedulerEntry.query.get(sid)
+        dse.name = name
+        dse.task = task
+        if not args:
+            args = '[]'
+        if not kwargs:
+            kwargs = '{}'
+        dse.arguments = args
+        dse.keyword_arguments = kwargs
+        dse.enabled = enabled
+        if every and period:
+            dse.interval = IntervalSchedule(every=every, period=period)
+        elif minute or hour or day_of_week or day_of_month or month_of_year:
+            dse.crontab = CrontabSchedule(minute=minute, hour=hour, day_of_week=day_of_week, day_of_month=day_of_month,
+                                          month_of_year=month_of_year)
+        db.session.save(dse)
+        db.session.commit()
+        pass
+
+    @staticmethod
     def get_schedule_list():
-        ss = DatabaseSchedulerEntry.query.all()
+        ss = DatabaseSchedulerEntry.query.order_by(desc(DatabaseSchedulerEntry.date_changed)).all()
         return ss
 
     @staticmethod
@@ -64,7 +86,8 @@ class SchedulerService:
                                                      DatabaseSchedulerEntry.task.like("%" + query + "%") if query is not None else ""))
         sh = SchedulerHistory.query.filter(SchedulerHistory.schedule_id.in_(ss),
                                            and_(SchedulerHistory.date_start >= start_at + ' 00:00:00',
-                                                SchedulerHistory.date_start <= start_at + ' 23:59:59') if start_at is not None else "")
+                                                SchedulerHistory.date_start <= start_at + ' 23:59:59') if start_at is not None else "")\
+            .order_by(desc(SchedulerHistory.date_start))
         return sh
 
     @staticmethod

@@ -373,6 +373,33 @@ def task_config__schedule():
             schedulerService.add_schedule(name, task, args, kwargs, enabled, minute=minute, hour=hour,
                                     day_of_week=day_of_week, day_of_month=day_of_month, month_of_year=month_of_year)
             return jsonify(ret)
+    elif request.method == 'POST':
+        sid = request.values.get('id')
+        if sid and Util.can_tune_to(sid, int):
+            name = request.values.get('name')
+            task = request.values.get('task')
+            args = request.values.get('args')
+            kwargs = request.values.get('kwargs')
+            enabled = request.values.get('enabled')
+            every = request.values.get('every')
+            period = request.values.get('period')
+            minute = request.values.get('minute')
+            hour = request.values.get('hour')
+            day_of_week = request.values.get('day_of_week')
+            day_of_month = request.values.get('day_of_month')
+            month_of_year = request.values.get('month_of_year')
+            if every and Util.can_tune_to(every, int):
+                ret = dict()
+                ret['result'] = 1
+                schedulerService.add_schedule(name, task, args, kwargs, enabled, every=every, period=period)
+                return jsonify(ret)
+            elif minute or hour or day_of_week or day_of_month or month_of_year:
+                ret = dict()
+                ret['result'] = 1
+                schedulerService.add_schedule(name, task, args, kwargs, enabled, minute=minute, hour=hour,
+                                              day_of_week=day_of_week, day_of_month=day_of_month,
+                                              month_of_year=month_of_year)
+                return jsonify(ret)
     return "error", 400
 
 

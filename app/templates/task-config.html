@@ -57,28 +57,28 @@
         </div>
     </div>
 
-    <div class="am-modal" id="createSchedule">
+    <div class="am-modal" id="schedule">
         <div class="am-modal-dialog" style="z-index: 101;">
-            <div class="am-modal-hd">新建计划
+            <div class="am-modal-hd"><span id="scheduleModalName"></span>
             <a href="javascript: void(0)" class="am-close am-close-spin" data-am-modal-close>&times;</a>
             </div>
             <div class="am-modal-bd">
                 <form action="" class="am-form">
                     <fieldset>
                         <div class="am-form-group">
-                            <input type="text" id="createScheduleName" minlength="3" data-foolish-msg="请输入正确的计划名称"
+                            <input type="text" id="scheduleName" minlength="3" data-foolish-msg="请输入正确的计划名称"
                                    placeholder="输入计划名称" required/>
                         </div>
                         <div class="am-form-group">
-                            <select data-am-selected="{btnWidth: '100%',placeholder:'选择任务'}" id="createScheduleTask">
+                            <select data-am-selected="{btnWidth: '100%',placeholder:'选择任务'}" id="scheduleTask">
                             </select>
                         </div>
                         <div class="am-form-group">
-                            <input type="text" id="createScheduleArgs" minlength="3" data-foolish-msg="请输入正确的args参数"
+                            <input type="text" id="scheduleArgs" minlength="3" data-foolish-msg="请输入正确的args参数"
                                    placeholder="输入args(json格式)" required/>
                         </div>
                         <div class="am-form-group">
-                            <input type="text" id="createScheduleKwargs" minlength="3" data-foolish-msg="请输入正确的kwargs参数"
+                            <input type="text" id="scheduleKwargs" minlength="3" data-foolish-msg="请输入正确的kwargs参数"
                                    placeholder="输入kwargs(json格式)" required/>
                         </div>
                         <div class="am-panel am-panel-secondary">
@@ -91,10 +91,10 @@
                             <div class="am-panel-bd am-g">
                                 <div id="intervalPannel">
                                     <div class="am-form-group am-u-sm-6">
-                                        <input type="text" id="createScheduleEvery" placeholder="Every" required/>
+                                        <input type="text" id="scheduleEvery" placeholder="Every" required/>
                                     </div>
                                     <div class="am-u-sm-6">
-                                        <select data-am-selected="{btnWidth: '100%'}" id="createSchedulePeriod">
+                                        <select data-am-selected="{btnWidth: '100%'}" id="schedulePeriod">
                                             <option value="microseconds">毫秒</option>
                                             <option value="seconds">秒</option>
                                             <option value="minutes">分钟</option>
@@ -113,19 +113,19 @@
                                     </ul>
                                     <ul class="am-avg-sm-5 am-thumbnails">
                                         <li class="am-thumbnail" style="border:0px;">
-                                            <input type="text" id="createScheduleCrontab1" maxlength="2" placeholder="*" required/>
+                                            <input type="text" id="scheduleCrontab1" maxlength="2" placeholder="*" required/>
                                         </li>
                                         <li class="am-thumbnail" style="border:0px;">
-                                            <input type="text" id="createScheduleCrontab2" maxlength="2" placeholder="*" required/>
+                                            <input type="text" id="scheduleCrontab2" maxlength="2" placeholder="*" required/>
                                         </li>
                                         <li class="am-thumbnail" style="border:0px;">
-                                            <input type="text" id="createScheduleCrontab3" maxlength="2" placeholder="*" required/>
+                                            <input type="text" id="scheduleCrontab3" maxlength="2" placeholder="*" required/>
                                         </li>
                                         <li class="am-thumbnail" style="border:0px;">
-                                            <input type="text" id="createScheduleCrontab4" maxlength="2" placeholder="*" required/>
+                                            <input type="text" id="scheduleCrontab4" maxlength="2" placeholder="*" required/>
                                         </li>
                                         <li class="am-thumbnail" style="border:0px;">
-                                            <input type="text" id="createScheduleCrontab5" maxlength="2" placeholder="*" required/>
+                                            <input type="text" id="scheduleCrontab5" maxlength="2" placeholder="*" required/>
                                         </li>
                                     </ul>
                                 </div>
@@ -133,14 +133,16 @@
                         </div>
                         <div class="am-u-sm-3">
                             <label class="am-checkbox">
-                                <input id="createScheduleEnabled" type="checkbox" checked="checked" value="" data-am-ucheck checked> 有效
+                                <input id="scheduleEnabled" type="checkbox" checked="checked" value="" data-am-ucheck> 有效
                             </label>
                         </div>
                     </fieldset>
                 </form>
             </div>
             <div class="am-modal-footer">
-                <span class="am-modal-btn" id="createScheduleCommit">确定</span>
+                <span class="am-modal-btn" id="createScheduleCommit">提交</span>
+                <span class="am-modal-btn" id="delScheduleCommit">删除</span>
+                <span class="am-modal-btn" id="editScheduleCommit">修改</span>
             </div>
         </div>
     </div>
@@ -154,6 +156,8 @@
         //手工展开对应的主菜单
         $("#sub-menu-task").collapse('open');
 
+        $("#createScheduleCommit").hide()
+
         load_schedule();
         load_task();
 
@@ -161,10 +165,17 @@
         $("#crontabPannel").hide();
 
         $("#btnCreateSchedule").click(function(){
-            $("#createSchedule").modal({
+            $("#scheduleModalName").html("新建计划");
+            $("#createScheduleCommit").addClass("am-modal-btn");
+            $("#createScheduleCommit").show();
+            $("#delScheduleCommit").removeClass("am-modal-btn")
+            $("#delScheduleCommit").hide();
+            $("#editScheduleCommit").removeClass("am-modal-btn")
+            $("#editScheduleCommit").hide();
+            $("#schedule").modal({
                 width: 400,
                 dimmer:false
-            })
+            });
         });
 
         $("#runTypeSelect").change(function(){
@@ -178,19 +189,19 @@
             }
         });
 
-        $("#createScheduleCommit").click(function(){
-            name=$('#createScheduleName').val();
-            task=$('#createScheduleTask').val();
-            args=$('#createScheduleArgs').val();
-            kwargs=$('#createScheduleKwargs').val();
-            if($('#createScheduleEnabled').is(':checked')){
+        $("#scheduleCommit").click(function(){
+            name=$('#scheduleName').val();
+            task=$('#scheduleTask').val();
+            args=$('#scheduleArgs').val();
+            kwargs=$('#scheduleKwargs').val();
+            if($('#scheduleEnabled').is(':checked')){
                 enabled=1
             }else{
                 enabled=0
             }
             if($('#runTypeSelect').val()=='interval'){
-                every=$('#createScheduleEvery').val();
-                period=$('#createSchedulePeriod').val();
+                every=$('#scheduleEvery').val();
+                period=$('#schedulePeriod').val();
                 minute=null;
                 hour=null;
                 day_of_week=null;
@@ -199,11 +210,11 @@
             }else if ($('#runTypeSelect').val()=='crontab'){
                 every=null;
                 period=null;
-                minute=$('#createScheduleCrontab1').val();
-                hour=$('#createScheduleCrontab2').val();
-                day_of_week=$('#createScheduleCrontab3').val();
-                day_of_month=$('#createScheduleCrontab4').val();
-                month_of_year=$('#createScheduleCrontab5').val();
+                minute=$('#scheduleCrontab1').val();
+                hour=$('#scheduleCrontab2').val();
+                day_of_week=$('#scheduleCrontab3').val();
+                day_of_month=$('#scheduleCrontab4').val();
+                month_of_year=$('#scheduleCrontab5').val();
             }
             create_schedule(name,task,args,kwargs,enabled,every,period,minute,hour,day_of_week,day_of_month,month_of_year)
         });
@@ -246,7 +257,7 @@
                 $("#schedule_list tbody").empty();
                 response.data.forEach(function(e){
                     var raw = $('<tr>'+
-                                '<td class="am-hide-sm-only">'+e.id+'</td>'+
+                                '<td class="am-hide-sm-only sid">'+e.id+'</td>'+
                                 '<td class=""><a href="#" class="name">'+e.name+'</a></td>'+
                                 '<td class="">'+e.task+'</td>'+
                                 '<td class="">'+e.run_type+'</td>'+
@@ -256,7 +267,7 @@
                                 '</tr>')
                     $("#schedule_list tbody").append(raw)
                 });
-
+                active_click()
             },
             error: function(XMLHttpRequest, textStatus, errorThrown) {
                 $.AMUI.progress.done();
@@ -279,12 +290,83 @@
             success: function(response) {
                 $.AMUI.progress.done();
                 console.log(response);
-                $("#createScheduleTask").empty();
+                $("#scheduleTask").empty();
                 response.data.forEach(function(e){
                     var raw = $('<option value="'+e+'">'+e+'</option>')
-                    $("#createScheduleTask").append(raw)
+                    $("#scheduleTask").append(raw)
                 });
 
+            },
+            error: function(XMLHttpRequest, textStatus, errorThrown) {
+                $.AMUI.progress.done();
+                //call failed
+                console.log("error");
+                $("#error_msg").html("网络连接异常，请稍后重试。");
+                $("#errorModal").modal("toggle");
+            }
+        });
+    }
+    function active_click(){
+        $(".name").click(function(){
+            sid = $(this).parent().parent().children('.sid').html();
+            console.log(sid)
+            load_detail(sid);
+            $("#scheduleModalName").html("编辑计划");
+            $("#createScheduleCommit").removeClass("am-modal-btn");
+            $("#createScheduleCommit").hide();
+            $("#delScheduleCommit").addClass("am-modal-btn");
+            $("#delScheduleCommit").show();
+            $("#editScheduleCommit").addClass("am-modal-btn");
+            $("#editScheduleCommit").show();
+            $("#schedule").modal({
+                width: 400,
+                dimmer:false
+            });
+        });
+    }
+    function load_detail(id){
+        $.AMUI.progress.start();
+        console.log("start load schedule detail");
+        jQuery.ajax({
+            url: "{{url_for('task_config__schedule')}}",
+            dataType: "json",
+            data: {'id':id},
+            type: "GET",
+            timeout : timeout,
+            success: function(response) {
+                $.AMUI.progress.done();
+                console.log(response);
+                e = response.data;
+                $('#scheduleName').val(e.name);
+                $('#scheduleTask').val(e.task);
+                $('#scheduleArgs').val(e.args);
+                $('#scheduleKwargs').val(e.kwargs);
+                if(e.enabled==1){
+                    $('#scheduleEnabled').uCheck('check')
+                }else{
+                    $('#scheduleEnabled').uCheck('uncheck')
+                }
+                if(e.run_type=='interval'){
+                    $('#runTypeSelect').val('interval')
+                    $('#runTypeSelect').trigger('changed.selected.amui');
+                    $('#scheduleEvery').val(e.every);
+                    $('#schedulePeriod').val(e.period);
+                    $('#schedulePeriod').trigger('changed.selected.amui');
+                    $('#scheduleCrontab1').val();
+                    $('#scheduleCrontab2').val();
+                    $('#scheduleCrontab3').val();
+                    $('#scheduleCrontab4').val();
+                    $('#scheduleCrontab5').val();
+                }else if (e.run_type=='crontab'){
+                    $('#runTypeSelect').val('crontab')
+                    $('#runTypeSelect').trigger('changed.selected.amui');
+                    $('#scheduleEvery').val('');
+                    $('#scheduleCrontab1').val(e.minute);
+                    $('#scheduleCrontab2').val(e.hour);
+                    $('#scheduleCrontab3').val(e.day_of_week);
+                    $('#scheduleCrontab4').val(e.day_of_month);
+                    $('#scheduleCrontab5').val(e.month_of_year);
+                }
             },
             error: function(XMLHttpRequest, textStatus, errorThrown) {
                 $.AMUI.progress.done();

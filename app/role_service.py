@@ -33,6 +33,9 @@ class RoleService:
     @staticmethod
     def del_role(role_id):
         r = Role.query.get(role_id)
+        us = User.query.filter(User.role == r)
+        for u in us:
+            u.role = None
         db.session.delete(r)
         db.session.commit()
 

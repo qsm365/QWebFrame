@@ -81,9 +81,8 @@ class SchedulerService:
 
     @staticmethod
     def get_task_history(query, start_at):
-        ss = db.session.query(DatabaseSchedulerEntry.id).filter(or_(DatabaseSchedulerEntry.name.like("%" + query + "%") if query is not None else "",
-                                                     DatabaseSchedulerEntry.task.like("%" + query + "%") if query is not None else ""))
-        sh = SchedulerHistory.query.filter(SchedulerHistory.schedule_id.in_(ss),
+        sh = SchedulerHistory.query.filter(or_(SchedulerHistory.schedule_name.like("%" + query + "%"),
+                                           SchedulerHistory.task_name.like("%" + query + "%")) if query is not None else "",
                                            and_(SchedulerHistory.date_start >= start_at + ' 00:00:00',
                                                 SchedulerHistory.date_start <= start_at + ' 23:59:59') if start_at is not None else "")\
             .order_by(desc(SchedulerHistory.date_start))
@@ -95,13 +94,16 @@ class SchedulerService:
         sh = SchedulerHistory.query.get(sh_id)
         if sh:
             ret['id'] = sh.id
-            ret['args'] = sh.schedule.arguments
-            ret['kwargs'] = sh.schedule.keyword_arguments
+            ret['args'] = sh.arguments
+            ret['kwargs'] = sh.keyword_arguments
             task_id = sh.task_id
             task = Task.query.filter(Task.task_id==task_id).first()
             if task:
-                ret['result'] = task.result
-                ret['traceback'] = task.traceback
+                ret['result'] = str(task.result)
+                if task.traceback:
+                    ret['traceback'] = task.traceback.replace('\n','<br>')
+                else:
+                    ret['traceback'] = None
             else:
                 ret['result'] = None
                 ret['traceback'] = None

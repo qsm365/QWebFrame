@@ -437,6 +437,7 @@ def task_his__his():
                 ret['data'] = td
             else:
                 ret['result'] = 2
+            print ret
             return jsonify(ret)
     else:
         query = request.values.get('query', '')

@@ -46,8 +46,8 @@
                             <table class="am-table am-table-striped am-table-hover table-main" id="task_his_list">
                                 <thead>
                                 <tr>
-                                    <th class="table-id am-hide-sm-only">ID</th>
                                     <th class="table-title am-hide-sm-only">计划名称</th>
+                                    <th class="table-title am-hide-sm-only">计划ID</th>
                                     <th class="table-title">任务名称</th>
                                     <th class="table-title">开始</th>
                                     <th class="table-title">结束</th>
@@ -80,6 +80,10 @@
                                             <td id="schedule_name"></td>
                                         </tr>
                                         <tr>
+                                            <td>计划ID</td>
+                                            <td id="schedule_id"></td>
+                                        </tr>
+                                        <tr>
                                             <td>任务名称</td>
                                             <td id="task_name"></td>
                                         </tr>
@@ -109,7 +113,7 @@
                                         </tr>
                                         <tr>
                                             <td>Traceback</td>
-                                            <td id="traceback"></td>
+                                            <td><pre id="traceback" class="am-pre-scrollable am-text-left"></pre></td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -119,6 +123,8 @@
                 </div>
             </div>
         </div>
+        <br>
+        <br>
     </div>
 
     <div class="am-modal am-modal-alert" tabindex="-1" id="errorModal">
@@ -176,14 +182,13 @@
                 $("#task_his_list tbody").empty();
                 response.data.hisList.forEach(function(e){
                     var raw = $('<tr>'+
-                                '<td class="am-hide-sm-only id">'+e.id+'</td>'+
-                                '<td class="am-hide-sm-only schedule">'+
-                                '   <input class="schedule_id" type="hidden" value="'+e.schedule_id+'"/>'+
-                                '   <a class="schedule_name" href="#">'+e.schedule_name+'</a></td>'+
+                                '<td class="am-hide-sm-only schedule_name">'+e.schedule_name+'</td>'+
+                                '<td class="am-hide-sm-only schedule_id">'+e.schedule_id+'</td>'+
                                 '<td class="task_name">'+e.task_name+'</td>'+
                                 '<td class="date_start">'+e.date_start+'</td>'+
                                 '<td class="am-hide-sm-only date_done">'+e.date_done+'</td>'+
                                 '<td class="">'+
+                                '   <input class="id" value="'+e.id+'" type="hidden"/>'+
                                 '   <a class="status" href="#">'+e.status+'</a>'+
                                 '</td>'+
                                 '</tr>')
@@ -243,8 +248,9 @@
             load_his_list(now*1+1,query,startAt);
         });
         $('.status').click(function(){
-            id = $(this).parent().parent().children('.id').html()
-            schedule_name = $(this).parent().parent().children('.schedule').children('.schedule_name').html()
+            id = $(this).parent().children('.id').val()
+            schedule_name = $(this).parent().parent().children('.schedule_name').html()
+            schedule_id = $(this).parent().parent().children('.schedule_id').html()
             task_name = $(this).parent().parent().children('.task_name').html()
             date_start = $(this).parent().parent().children('.date_start').html()
             date_done = $(this).parent().parent().children('.date_done').html()
@@ -257,16 +263,13 @@
             $("#tabs").tabs('open',1);
             $("#selected_task").html("计划任务[ID:"+id+"]的详细信息:");
             $("#schedule_name").html(schedule_name)
+            $("#schedule_id").html(schedule_id)
             $("#task_name").html(task_name)
             $("#date_start").html(date_start)
             $("#date_done").html(date_done)
             $("#status").html(status)
 
             load_detail(id)
-        });
-        $('.schedule_name').click(function(){
-            schedule_id = $(this).parent().children('.schedule_id').val()
-            console.log(schedule_id)
         });
     }
     function load_detail(id){

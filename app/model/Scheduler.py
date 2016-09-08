@@ -231,9 +231,13 @@ class SchedulerHistory(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     date_start = db.Column(db.DateTime, default=datetime.datetime.utcnow,
                           onupdate=datetime.datetime.utcnow, nullable=True)
-    schedule_id = db.Column(db.Integer, db.ForeignKey('celery_schedules.id'))
-    schedule = db.relationship("DatabaseSchedulerEntry")
+    schedule_id = db.Column(db.Integer)
+    schedule_name = db.Column(db.String(255))
     task_id = db.Column(db.String(255))
+    task_name = db.Column(db.String(255))
+    arguments = db.Column(db.String(255))
+    keyword_arguments = db.Column(db.String(255))
+
 
     def serialize(self):
         """Return object data in easily serializeable format"""
@@ -241,10 +245,10 @@ class SchedulerHistory(db.Model):
         if result:
             return {
                 'id': self.id,
-                'schedule_name': self.schedule.name,
                 'schedule_id': self.schedule_id,
-                'task_name': self.schedule.task,
+                'schedule_name': self.schedule_name,
                 'task_id': self.task_id,
+                'task_name': self.task_name,
                 'date_start': datetime.datetime.strftime(Util.utc2local(self.date_start), '%Y-%m-%d %H:%M:%S'),
                 'date_done': datetime.datetime.strftime(Util.utc2local(result.date_done), '%Y-%m-%d %H:%M:%S'),
                 'status': result.status,
@@ -252,10 +256,10 @@ class SchedulerHistory(db.Model):
         else:
             return {
                 'id': self.id,
-                'schedule_name': self.schedule.name,
                 'schedule_id': self.schedule_id,
-                'task_name': self.schedule.task,
+                'schedule_name': self.schedule.name,
                 'task_id': self.task_id,
+                'task_name': self.task_name,
                 'date_start': datetime.datetime.strftime(Util.utc2local(self.date_start), '%Y-%m-%d %H:%M:%S'),
                 'date_done': None,
                 'status': 'PENDING',

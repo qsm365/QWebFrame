@@ -128,9 +128,13 @@ class DatabaseScheduler(Scheduler):
             self.logger.info('Scheduler: Sending due task %s (%s)', entry.name, entry.task)
             try:
                 result = self.apply_async(entry, publisher=publisher)
-                sh = SchedulerHistory(date_start = datetime.datetime.utcnow())
-                sh.schedule = entry.model
+                sh = SchedulerHistory(date_start=datetime.datetime.utcnow())
+                sh.schedule_id = entry.model.id
+                sh.schedule_name = entry.model.name
                 sh.task_id = result.id
+                sh.task_name = entry.model.task
+                sh.arguments = entry.model.arguments
+                sh.keyword_arguments = entry.model.keyword_arguments
                 db.session.add(sh)
                 db.session.commit()
             except Exception as exc:

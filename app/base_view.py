@@ -325,7 +325,7 @@ def task_config():
     return render_template('task-config.html', title=u'任务配置')
 
 
-@app.route('/task-config/schedule', methods=['GET', 'PUT', 'DELETE'])
+@app.route('/task-config/schedule', methods=['GET', 'PUT', 'DELETE', 'POST'])
 @login_required()
 @privilege('task_config__schedule')
 def task_config__schedule():
@@ -391,12 +391,12 @@ def task_config__schedule():
             if every and Util.can_tune_to(every, int):
                 ret = dict()
                 ret['result'] = 1
-                schedulerService.add_schedule(name, task, args, kwargs, enabled, every=every, period=period)
+                schedulerService.mod_schedule(sid, name, task, args, kwargs, enabled, every=every, period=period)
                 return jsonify(ret)
             elif minute or hour or day_of_week or day_of_month or month_of_year:
                 ret = dict()
                 ret['result'] = 1
-                schedulerService.add_schedule(name, task, args, kwargs, enabled, minute=minute, hour=hour,
+                schedulerService.mod_schedule(sid, name, task, args, kwargs, enabled, minute=minute, hour=hour,
                                               day_of_week=day_of_week, day_of_month=day_of_month,
                                               month_of_year=month_of_year)
                 return jsonify(ret)

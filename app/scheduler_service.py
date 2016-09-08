@@ -57,7 +57,6 @@ class SchedulerService:
         elif minute or hour or day_of_week or day_of_month or month_of_year:
             dse.crontab = CrontabSchedule(minute=minute, hour=hour, day_of_week=day_of_week, day_of_month=day_of_month,
                                           month_of_year=month_of_year)
-        db.session.save(dse)
         db.session.commit()
         pass
 

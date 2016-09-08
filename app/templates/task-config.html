@@ -140,6 +140,7 @@
                 </form>
             </div>
             <div class="am-modal-footer">
+                <input id="scheduleId" type="hidden"/>
                 <span class="am-modal-btn" id="createScheduleCommit">提交</span>
                 <span class="am-modal-btn" id="delScheduleCommit">删除</span>
                 <span class="am-modal-btn" id="editScheduleCommit">修改</span>
@@ -172,6 +173,17 @@
             $("#delScheduleCommit").hide();
             $("#editScheduleCommit").removeClass("am-modal-btn")
             $("#editScheduleCommit").hide();
+            $('#scheduleName').val('');
+            $('#scheduleArgs').val('');
+            $('#scheduleKwargs').val('');
+            $('#runTypeSelect').val('interval')
+            $('#runTypeSelect').trigger('changed.selected.amui');
+            $('#scheduleEvery').val('');
+            $('#scheduleCrontab1').val('');
+            $('#scheduleCrontab2').val('');
+            $('#scheduleCrontab3').val('');
+            $('#scheduleCrontab4').val('');
+            $('#scheduleCrontab5').val('');
             $("#schedule").modal({
                 width: 400,
                 dimmer:false
@@ -189,7 +201,7 @@
             }
         });
 
-        $("#scheduleCommit").click(function(){
+        $("#createScheduleCommit").click(function(){
             name=$('#scheduleName').val();
             task=$('#scheduleTask').val();
             args=$('#scheduleArgs').val();
@@ -218,7 +230,66 @@
             }
             create_schedule(name,task,args,kwargs,enabled,every,period,minute,hour,day_of_week,day_of_month,month_of_year)
         });
+        $('#delScheduleCommit').click(function(){
+            if(confirm("确认删除吗？")){
+                id = $('#scheduleId').val();
+                del_schedule(id);
+            }
+        });
+        $('#editScheduleCommit').click(function(){
+            id = $('#scheduleId').val();
+            name=$('#scheduleName').val();
+            task=$('#scheduleTask').val();
+            args=$('#scheduleArgs').val();
+            kwargs=$('#scheduleKwargs').val();
+            if($('#scheduleEnabled').is(':checked')){
+                enabled=1
+            }else{
+                enabled=0
+            }
+            if($('#runTypeSelect').val()=='interval'){
+                every=$('#scheduleEvery').val();
+                period=$('#schedulePeriod').val();
+                minute=null;
+                hour=null;
+                day_of_week=null;
+                day_of_month=null;
+                month_of_year=null;
+            }else if ($('#runTypeSelect').val()=='crontab'){
+                every=null;
+                period=null;
+                minute=$('#scheduleCrontab1').val();
+                hour=$('#scheduleCrontab2').val();
+                day_of_week=$('#scheduleCrontab3').val();
+                day_of_month=$('#scheduleCrontab4').val();
+                month_of_year=$('#scheduleCrontab5').val();
+            }
+            edit_schedule(id,name,task,args,kwargs,enabled,every,period,minute,hour,day_of_week,day_of_month,month_of_year)
+        });
     });
+    function edit_schedule(id,name,task,args,kwargs,enabled,every,period,minute,hour,day_of_week,day_of_month,month_of_year){
+        $.AMUI.progress.start();
+        console.log("start load user list");
+        jQuery.ajax({
+            url: "{{url_for('task_config__schedule')}}",
+            dataType: "json",
+            data: {'id':id,'name':name,'task':task,'args':args,'kwargs':kwargs,'enabled':enabled,'every':every,'period':period,'minute':minute,'hour':hour,'day_of_week':day_of_week,'day_of_month':day_of_month,'month_of_year':month_of_year},
+            type: "POST",
+            timeout : timeout,
+            success: function(response) {
+                $.AMUI.progress.done();
+                console.log(response);
+                load_schedule();
+            },
+            error: function(XMLHttpRequest, textStatus, errorThrown) {
+                $.AMUI.progress.done();
+                //call failed
+                console.log("error");
+                $("#error_msg").html("网络连接异常，请稍后重试。");
+                $("#errorModal").modal("toggle");
+            }
+        });
+    }
     function create_schedule(name,task,args,kwargs,enabled,every,period,minute,hour,day_of_week,day_of_month,month_of_year){
         $.AMUI.progress.start();
         console.log("start load user list");
@@ -337,6 +408,7 @@
                 $.AMUI.progress.done();
                 console.log(response);
                 e = response.data;
+                $('#scheduleId').val(e.id);
                 $('#scheduleName').val(e.name);
                 $('#scheduleTask').val(e.task);
                 $('#scheduleArgs').val(e.args);
@@ -352,11 +424,11 @@
                     $('#scheduleEvery').val(e.every);
                     $('#schedulePeriod').val(e.period);
                     $('#schedulePeriod').trigger('changed.selected.amui');
-                    $('#scheduleCrontab1').val();
-                    $('#scheduleCrontab2').val();
-                    $('#scheduleCrontab3').val();
-                    $('#scheduleCrontab4').val();
-                    $('#scheduleCrontab5').val();
+                    $('#scheduleCrontab1').val('');
+                    $('#scheduleCrontab2').val('');
+                    $('#scheduleCrontab3').val('');
+                    $('#scheduleCrontab4').val('');
+                    $('#scheduleCrontab5').val('');
                 }else if (e.run_type=='crontab'){
                     $('#runTypeSelect').val('crontab')
                     $('#runTypeSelect').trigger('changed.selected.amui');
@@ -367,6 +439,29 @@
                     $('#scheduleCrontab4').val(e.day_of_month);
                     $('#scheduleCrontab5').val(e.month_of_year);
                 }
+            },
+            error: function(XMLHttpRequest, textStatus, errorThrown) {
+                $.AMUI.progress.done();
+                //call failed
+                console.log("error");
+                $("#error_msg").html("网络连接异常，请稍后重试。");
+                $("#errorModal").modal("toggle");
+            }
+        });
+    }
+    function del_schedule(id){
+        $.AMUI.progress.start();
+        console.log("start load schedule detail");
+        jQuery.ajax({
+            url: "{{url_for('task_config__schedule')}}",
+            dataType: "json",
+            data: {'id':id},
+            type: "DELETE",
+            timeout : timeout,
+            success: function(response) {
+                $.AMUI.progress.done();
+                console.log(response);
+                load_schedule();
             },
             error: function(XMLHttpRequest, textStatus, errorThrown) {
                 $.AMUI.progress.done();

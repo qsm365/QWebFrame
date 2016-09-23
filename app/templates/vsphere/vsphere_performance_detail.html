@@ -1,0 +1,189 @@
+{% extends "base_with_sidebar.html" %}
+{% block header_btns %}
+    <a href="#" class="am-btn am-btn-secondary">
+        <i class="am-header-icon am-icon-user"></i>
+        <span class="am-header-nav-title">
+            账号
+        </span>
+    </a>
+    <a href="{{url_for('logout')}}" class="am-btn am-btn-secondary">
+        <i class="am-header-icon am-icon-power-off"></i>
+        <span class="am-header-nav-title">
+            退出
+        </span>
+    </a>
+{% endblock %}
+{% block content %}
+    <div class="admin-content-body">
+        <div class="am-cf am-padding am-padding-bottom-0">
+            <div class="am-fl am-g">
+                <span>
+                    <font size="5">{{info.name}}</font>
+                </span>
+
+                {% if perftype == 'vm' %}
+                <a class="am-btn am-btn-warning am-fr" href="{{url_for('vsphere_vm_detail')}}?vmid={{moid}}">查看VM配置</a>
+                {% elif perftype == 'host' %}
+                <a class="am-btn am-btn-warning am-fr" href="{{url_for('vsphere_host_detail')}}?hostid={{moid}}">查看物理机配置</a>
+                {% endif %}
+
+                <div class="am-dropdown am-fr" data-am-dropdown>
+                    <button class="am-btn am-btn-primary am-dropdown-toggle nopadding" type="button" data-toggle="dropdown">
+                        <span>{{histlevelstr}}</span>
+                        <span class="am-icon-caret-down"></span>
+                    </button>
+                    <ul class="am-dropdown-content">
+                        <li><a href="{{url_for('vsphere_performance_detail')}}?type={{perftype}}&moid={{moid}}">准实时</a></li>
+                        <li><a href="{{url_for('vsphere_performance_detail')}}?type={{perftype}}&moid={{moid}}&histlevel=day">近一天</a></li>
+                        <li><a href="{{url_for('vsphere_performance_detail')}}?type={{perftype}}&moid={{moid}}&histlevel=week">近一周</a></li>
+                        <li><a href="{{url_for('vsphere_performance_detail')}}?type={{perftype}}&moid={{moid}}&histlevel=month">近一月</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <hr>
+        <div class="am-g">
+            <div class="am-u-sm-12">
+                <table class="am-table">
+                    <thead>
+                        <th>项目</th>
+                        <th>平均</th>
+                        <th>最大</th>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>CPU使用率</td>
+                        <td>{{cpuval|average}} %</td>
+                        <td>{{cpuval|max}} %</td>
+                    </tr>
+                    <tr>
+                        <td>内存使用率</td>
+                        <td>{{memval|average}} %</td>
+                        <td>{{memval|max}} %</td>
+                    </tr>
+                    <tr>
+                        <td>磁盘速率</td>
+                        <td>{{disk1val|average|adjustnum_k}}Bps</td>
+                        <td>{{disk1val|max|adjustnum_k}}Bps</td>
+                    </tr>
+                    <tr>
+                        <td>磁盘延时</td>
+                        <td>{{disk2val|average}} ms</td>
+                        <td>{{disk2val|max}} ms</td>
+                    </tr>
+                    <tr>
+                        <td>网络速率</td>
+                        <td>{{netval|average|adjustnum_k}}Bps</td>
+                        <td>{{netval|max|adjustnum_k}}Bps</td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div id="chartContainer1" style="height: 300px; width: 100%;"></div>
+                <div id="chartContainer4" style="height: 300px; width: 100%;"></div>
+                <div id="chartContainer2" style="height: 300px; width: 100%;"></div>
+                <div id="chartContainer3" style="height: 300px; width: 100%;"></div>
+                <div id="chartContainer5" style="height: 300px; width: 100%;"></div>
+                <br>
+                <br>
+                <br>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block js %}
+<script src="{{ url_for('static', filename='vsphere/js/jquery.canvasjs.min.js') }}"></script>
+<script type="text/javascript">
+  $(document).ready(function() {
+    //手工展开对应的主菜单
+    $("#sub-menu-vsphere").collapse('open');
+
+    var chart1 = new CanvasJS.Chart("chartContainer1",
+    {
+      title:{
+      text: "CPU使用率 (%)"
+      },
+       data: [
+      {
+        type: "line",
+        dataPoints: [
+        {% for i in range(slen) %}
+        { x: new Date("{{sampletime[i]}}"), y: ({{cpuval[i]}}+0) },
+        {% endfor %}
+        ]
+      }
+      ]
+    });
+    var chart2 = new CanvasJS.Chart("chartContainer2",
+    {
+      title:{
+      text: "DiskIO速率 (KBps)"
+      },
+       data: [
+      {
+        type: "line",
+        dataPoints: [
+        {% for i in range(slen) %}
+        { x: new Date("{{sampletime[i]}}"), y: ({{disk1val[i]}}+0) },
+        {% endfor %}
+        ]
+      }
+      ]
+    });
+    var chart3 = new CanvasJS.Chart("chartContainer3",
+    {
+      title:{
+      text: "DiskIO延时 (ms)"
+      },
+       data: [
+      {
+        type: "line",
+        dataPoints: [
+        {% for i in range(slen) %}
+        { x: new Date("{{sampletime[i]}}"), y: ({{disk2val[i]}}+0) },
+        {% endfor %}
+        ]
+      }
+      ]
+    });
+    var chart4 = new CanvasJS.Chart("chartContainer4",
+    {
+      title:{
+      text: "内存使用率 (%)"
+      },
+       data: [
+      {
+        type: "line",
+        dataPoints: [
+        {% for i in range(slen) %}
+        { x: new Date("{{sampletime[i]}}"), y: ({{memval[i]}}+0) },
+        {% endfor %}
+        ]
+      }
+      ]
+    });
+    var chart5 = new CanvasJS.Chart("chartContainer5",
+    {
+      title:{
+      text: "网络速率 (KBps)"
+      },
+       data: [
+      {
+        type: "line",
+        dataPoints: [
+        {% for i in range(slen) %}
+        { x: new Date("{{sampletime[i]}}"), y: ({{netval[i]}}+0) },
+        {% endfor %}
+        ]
+      }
+      ]
+    });
+
+    chart1.render();
+    chart2.render();
+    chart3.render();
+    chart4.render();
+    chart5.render();
+  });
+</script>
+{% endblock %}

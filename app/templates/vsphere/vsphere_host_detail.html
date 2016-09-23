@@ -1,0 +1,107 @@
+{% extends "base_with_sidebar.html" %}
+{% block header_btns %}
+    <a href="#" class="am-btn am-btn-secondary">
+        <i class="am-header-icon am-icon-user"></i>
+        <span class="am-header-nav-title">
+            账号
+        </span>
+    </a>
+    <a href="{{url_for('logout')}}" class="am-btn am-btn-secondary">
+        <i class="am-header-icon am-icon-power-off"></i>
+        <span class="am-header-nav-title">
+            退出
+        </span>
+    </a>
+{% endblock %}
+{% block content %}
+<div class="admin-content-body">
+        <div class="am-cf am-padding am-padding-bottom-0">
+            <div class="am-fl am-g">
+                <span>
+                    <font size="5">{{hostinfo.name}}</font>
+                </span>
+                <a class="am-btn am-btn-warning am-fr" href="{{url_for('vsphere_performance_detail')}}?type=host&moid={{hostinfo[1]}}">查看物理机性能</a>
+            </div>
+        </div>
+        <hr>
+        <div class="am-g">
+            <div class="am-u-sm-12">
+            <table class="am-table">
+                <tbody>
+                <tr>
+                    <td>物理机名</td>
+                    <td>{{hostinfo.name}}</td>
+                </tr>
+                <tr>
+                    <td>品牌</td>
+                    <td>{{hostinfo.vendor}}</td>
+                </tr>
+                <tr>
+                    <td>型号</td>
+                    <td>{{hostinfo.model}}</td>
+                </tr>
+                <tr>
+                    <td>所属集群</td>
+                    <td><a href="{{url_for('vsphere_host_home')}}?domainid={{hostinfo.domainid}}">{{hostinfo.domain}}</a></td>
+                </tr>
+                <tr>
+                    <td>CPU</td>
+                    <td>{{hostinfo.cpu}}</td>
+                </tr>
+                <tr>
+                    <td>内存</td>
+                    <td>{{(hostinfo.mem/1024)|round}} GB</td>
+                </tr>
+                <tr>
+                    <td>已分配CPU</td>
+                    <td>{{hostinfo.vcpu}}</td>
+                </tr>
+                <tr>
+                    <td>已分配内存</td>
+                    <td>{{hostinfo.vmem/1024}} GB</td>
+                </tr>
+                </tbody>
+            </table>
+            <div class="am-panel am-panel-primary"　id="panel-vmlist">
+                <div class="am-panel-hd"  data-am-collapse="{parent: '#panel-vmlist', target: '#panel-vmlist-body'}">
+                    虚拟机信息
+                    <span class="am-badge am-fr">{{hostinfo.vms|length}}</span>
+                </div>
+                <div class="am-panel-bd am-collapse" id="panel-vmlist-body">
+                    <table class="am-table">
+                        <thead>
+                            <tr>
+                                <td>虚拟机名称</td>
+                                <td>项目</td>
+                                <td>状态</td>
+                                <td>CPU</td>
+                                <td>内存</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {%for vm in hostinfo.vms%}
+                            <tr>
+                                <td><a href="{{url_for('vsphere_vm_detail')}}?vmid={{vm.vmid}}">{{vm.name}}</a></td>
+                                <td><a href="{{url_for('vsphere_vm_list')}}?vmfid={{vm.parentid}}">{{vm.parent}}</a></td>
+                                <td>{{vm.state}}</td>
+                                <td>{{vm.cpu}}</td>
+                                <td>{{vm.memory/1024}} GB</td>
+                            </tr>
+                            {%endfor%}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+<div style="text-align:center;">数据更新时间:{{version[1]}};</br>数据version id:{{version[0]}};</div>
+{% endblock %}
+{% block js %}
+<script language="JavaScript">
+    $(document).ready(function() {
+        //手工展开对应的主菜单
+        $("#sub-menu-vsphere").collapse('open');
+    });
+</script>
+{% endblock %}

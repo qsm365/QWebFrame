@@ -1,0 +1,80 @@
+{% extends "base_with_sidebar.html" %}
+{% block header_btns %}
+    <a href="#" class="am-btn am-btn-secondary">
+        <i class="am-header-icon am-icon-user"></i>
+        <span class="am-header-nav-title">
+            账号
+        </span>
+    </a>
+    <a href="{{url_for('logout')}}" class="am-btn am-btn-secondary">
+        <i class="am-header-icon am-icon-power-off"></i>
+        <span class="am-header-nav-title">
+            退出
+        </span>
+    </a>
+{% endblock %}
+{% block content %}
+    <div class="admin-content-body">
+        <div class="am-cf am-padding am-padding-bottom-0">
+            <div class="am-g">
+                <span><font size="5">物理机列表</font></span>
+                <span class="am-badge am-badge-primary">物理机数量:{{hostinfo|length}}</span>
+                <div class="am-fr">
+                    <span>集群选择: </span>
+                    <span class="am-dropdown" data-am-dropdown>
+                        <button class="am-btn am-btn-primary am-dropdown-toggle nopadding" type="button" data-toggle="dropdown">
+                            <span>{% if domain %}{{domains[domain]}}{% else %}所有{% endif %}</span>
+                            <span class="am-icon-caret-down"></span>
+                        </button>
+                        <ul class="am-dropdown-content">
+                            <li><a href="{{url_for('vsphere_host_home')}}">所有</a></li>
+                            {% for k,v in domains.items() %}
+                            <li><a href="{{url_for('vsphere_host_home')}}?domainid={{k}}">{{v}}</a></li>
+                            {% endfor %}
+                        </ul>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <hr>
+        <div class="am-g">
+            <div class="am-u-sm-12">
+            <table class="am-table">
+                <thead>
+                    <tr>
+                        <td>物理机名称</td>
+                        <td>集群名称</td>
+                        <td>CPU</td>
+                        <td>内存</td>
+                        <td>虚机数量</td>
+                        <td>已分配CPU</td>
+                        <td>已分配内存</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for h in hostinfo|sort(attribute='name') %}
+                    <tr class="onerow" id="{{h[0]}}">
+                        <td><a href="{{url_for('vsphere_host_detail')}}?hostid={{h.id}}">{{h.name}}</a></td>
+                        <td><a href="{{url_for('vsphere_host_home')}}?domainid={{h.domainid}}">{{h.domain}}</a></td>
+                        <td>{{h.hcpu}}</td>
+                        <td>{{(h.hmem/1024)|round}}GB</td>
+                        <td><span class="am-badge am-badge-primary">{{h.vmcount}}</span></td>
+                        <td>{{h.vcpu}}</td>
+                        <td>{{(h.vmem/1024)|round}}GB</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            </div>
+        </div>
+    </div>
+<div style="text-align:center;">数据更新时间:{{version.synctime}};</br>数据version id:{{version.id}};</div>
+{% endblock %}
+{% block js %}
+<script language="JavaScript">
+    $(document).ready(function() {
+        //手工展开对应的主菜单
+        $("#sub-menu-vsphere").collapse('open');
+    });
+</script>
+{% endblock %}

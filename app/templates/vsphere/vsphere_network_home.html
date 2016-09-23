@@ -1,0 +1,57 @@
+{% extends "base_with_sidebar.html" %}
+{% block header_btns %}
+    <a href="#" class="am-btn am-btn-secondary">
+        <i class="am-header-icon am-icon-user"></i>
+        <span class="am-header-nav-title">
+            账号
+        </span>
+    </a>
+    <a href="{{url_for('logout')}}" class="am-btn am-btn-secondary">
+        <i class="am-header-icon am-icon-power-off"></i>
+        <span class="am-header-nav-title">
+            退出
+        </span>
+    </a>
+{% endblock %}
+{% block content %}
+    <div class="admin-content-body">
+        <div class="am-cf am-padding am-padding-bottom-0">
+            <div class="am-fl am-cf">
+                <span><font size="5">Network列表</font></span>
+                <span class="am-badge am-badge-primary">数量:{{networks|length}}</span>
+            </div>
+        </div>
+        <hr>
+        <div class="am-g">
+            <div class="am-u-sm-12">
+                <table class="am-table">
+                    <thead>
+                        <tr>
+                            <td>Network名称</td>
+                            <td>Network类型</td>
+                            <td class="am-fr">数量</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for n in networks| sort(attribute='name') %}
+                        <tr class="onerow" id="{{n[0]}}">
+                            <td ><a href="{{url_for('vsphere_network_detail')}}?networkid={{n.id}}">{{n.name}}</a></td>
+                            <td ><span class="">{{n.type}}</span></td>
+                            <td ><span class="am-badge am-badge-primary am-fr">{{n.count}}</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+<div style="text-align:center;">数据更新时间:{{version[1]}};</br>数据version id:{{version[0]}};</div>
+{% endblock %}
+{% block js %}
+<script language="JavaScript">
+    $(document).ready(function() {
+        //手工展开对应的主菜单
+        $("#sub-menu-vsphere").collapse('open');
+    });
+</script>
+{% endblock %}

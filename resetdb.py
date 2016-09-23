@@ -4,6 +4,7 @@ from app.model import db
 from app.role_service import RoleService
 from app.privilege_service import PrivilegeService
 from app.user_service import UserService
+from app.vsphere_sync import VsphereSync
 
 db.drop_all()
 db.create_all()
@@ -50,3 +51,6 @@ privilegeService.link_role_privilege(1, 12, True, True)
 privilegeService.link_role_privilege(1, 13, True, True)
 
 privilegeService.link_role_privilege(2, 1, True, False)
+
+vsphereSync = VsphereSync()
+vsphereSync.sync()

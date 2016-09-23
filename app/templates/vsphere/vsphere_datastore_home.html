@@ -1,0 +1,63 @@
+{% extends "base_with_sidebar.html" %}
+{% block header_btns %}
+    <a href="#" class="am-btn am-btn-secondary">
+        <i class="am-header-icon am-icon-user"></i>
+        <span class="am-header-nav-title">
+            账号
+        </span>
+    </a>
+    <a href="{{url_for('logout')}}" class="am-btn am-btn-secondary">
+        <i class="am-header-icon am-icon-power-off"></i>
+        <span class="am-header-nav-title">
+            退出
+        </span>
+    </a>
+{% endblock %}
+{% block content %}
+    <div class="admin-content-body">
+        <div class="am-cf am-padding am-padding-bottom-0">
+            <div class="am-fl am-cf">
+                <span><font size="5">存储列表</font></span>
+                <span class="am-badge am-badge-primary">存储数量:{{datastoreinfo|length}}</span>
+            </div>
+        </div>
+        <hr>
+        <div class="am-g">
+            <div class="am-u-sm-12">
+                <table class="am-table">
+                    <thead>
+                        <tr>
+                            <td>存储名称</td>
+                            <td>容量</td>
+                            <td>可用空间</td>
+                            <td>制备空间</td>
+                            <td>使用率</td>
+                            <td>制备率</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for d in datastoreinfo|sort(attribute='name') %}
+                        <tr class="onerow" id="{{d[1]}}">
+                            <td><a href="#">{{d.name}}</a></td>
+                            <td>{{d.capacity|adjustnum}}</td>
+                            <td>{{d.freespace|adjustnum}}</td>
+                            <td>{{(d.capacity-d.freespace+d.uncommitted)|adjustnum}}</td>
+                            <td>{{(1-d.freespace/d.capacity)|percentage}}</td>
+                            <td>{{((d.capacity-d.freespace+d.uncommitted)/d.capacity)|percentage}}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+<div style="text-align:center;">数据更新时间:{{version.synctime}};</br>数据version id:{{version.id}};</div>
+{% endblock %}
+{% block js %}
+<script language="JavaScript">
+    $(document).ready(function() {
+        //手工展开对应的主菜单
+        $("#sub-menu-vsphere").collapse('open');
+    });
+</script>
+{% endblock %}

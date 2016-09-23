@@ -8,3 +8,9 @@ app.config.from_pyfile('config.py')
 
 from app.base_view import baseProfile
 app.register_blueprint(baseProfile)
+
+from app.vsphere_view import vsphereProfile
+app.register_blueprint(vsphereProfile)
+
+from app.filters import filterProfile
+app.register_blueprint(filterProfile)

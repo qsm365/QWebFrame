@@ -1,0 +1,62 @@
+{% extends "base_with_sidebar.html" %}
+{% block header_btns %}
+    <a href="#" class="am-btn am-btn-secondary">
+        <i class="am-header-icon am-icon-user"></i>
+        <span class="am-header-nav-title">
+            账号
+        </span>
+    </a>
+    <a href="{{url_for('logout')}}" class="am-btn am-btn-secondary">
+        <i class="am-header-icon am-icon-power-off"></i>
+        <span class="am-header-nav-title">
+            退出
+        </span>
+    </a>
+{% endblock %}
+{% block content %}
+    <div class="admin-content-body">
+        <div class="am-cf am-padding am-padding-bottom-0">
+            <div class="am-fl am-cf">
+                <span>
+                    <font size="5">{{folders.name}}</font>
+                </span>
+                <span class="am-badge am-badge-primary">项目数量:{{folders.project_number}}</span>
+                <span class="am-badge am-badge-primary">虚拟机数量:{{folders.vm_number}}</span>
+            </div>
+        </div>
+        <hr>
+        <div class="am-g">
+            <div class="am-u-sm-12">
+            <table class="am-table">
+                <thead>
+                    <tr>
+                        <td>项目名称</td>
+                        <td class="am-fr">虚拟机数量</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="onerow" id="">
+                        <td><a href="{{url_for('vsphere_vm_list')}}?vmfid={{folders.id}}">未分组虚拟机</a></td>
+                        <td><span class="am-badge am-badge-primary am-fr">{{folders.unclassified}}</span></td>
+                    </tr>
+                    {% for f in folders.folders %}
+                    <tr class="onerow" id="{{f.name}}">
+                        <td ><a href="{{url_for('vsphere_vm_list')}}?vmfid={{f.id}}">{{f.name}}</a></td>
+                        <td ><span class="am-badge am-badge-primary am-fr">{{f.members}}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            </div>
+        </div>
+    </div>
+<div style="text-align:center;">数据更新时间:{{version.synctime}};</br>数据version id:{{version.id}};</div>
+{% endblock %}
+{% block js %}
+<script language="JavaScript">
+    $(document).ready(function() {
+        //手工展开对应的主菜单
+        $("#sub-menu-vsphere").collapse('open');
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,141 @@
+{% extends "base_with_sidebar.html" %}
+{% block header_btns %}
+    <a href="#" class="am-btn am-btn-secondary">
+        <i class="am-header-icon am-icon-user"></i>
+        <span class="am-header-nav-title">
+            账号
+        </span>
+    </a>
+    <a href="{{url_for('logout')}}" class="am-btn am-btn-secondary">
+        <i class="am-header-icon am-icon-power-off"></i>
+        <span class="am-header-nav-title">
+            退出
+        </span>
+    </a>
+{% endblock %}
+{% block content %}
+    <div class="admin-content-body">
+        <div class="am-cf am-padding am-padding-bottom-0">
+            <div class="am-fl am-g">
+                <span>
+                    <font size="5">{{vminfo.name}}</font>
+                </span>
+                <a class="am-btn am-btn-warning am-fr" href="{{url_for('vsphere_performance_detail')}}?type=vm&moid={{vminfo.vmid}}">查看VM性能</a>
+            </div>
+        </div>
+        <hr>
+        <div class="am-g">
+            <div class="am-u-sm-12">
+            <table class="am-table">
+                <tbody>
+                <tr>
+                    <td>虚拟机名</td>
+                    <td>{{vminfo.name}}</td>
+                </tr>
+                <tr>
+                    <td>状态</td>
+                    <td>{{vminfo.state}}</td>
+                </tr>
+                <tr>
+                    <td>所属项目</td>
+                    <td><a href="{{url_for('vsphere_project_list')}}?vmfid={{zoneinfo.folderid}}">{{zoneinfo.name}}</a>
+                        {%if projectinfo%}
+                          - <a href="{{url_for('vsphere_vm_list')}}?vmfid={{projectinfo.folderid}}">{{projectinfo.name}}</a>
+                        {%endif%}
+                    </td>
+                </tr>
+                <tr>
+                    <td>OS</td>
+                    <td>{{vminfo.os}}</td>
+                </tr>
+                <tr>
+                    <td>CPU</td>
+                    <td>{{vminfo.cpu}}</td>
+                </tr>
+                <tr>
+                    <td>内存</td>
+                    <td>{{vminfo.memory/1024}} G</td>
+                </tr>
+                <tr>
+                    <td>存储已使用</td>
+                    <td>{{vminfo.committed|adjustnum}}</td>
+                </tr>
+                <tr>
+                    <td>存储已置备</td>
+                    <td>{{(vminfo.committed+vminfo.uncommitted)|adjustnum}}</td>
+                </tr>
+                <tr>
+                    <td>使用/置备</td>
+                    <td>
+                        <div class="am-progress">
+                            <div class="am-progress-bar" role="progressbar"
+                                 aria-valuemin="0" aria-valuemax="100" style="width: {{(vminfo['committed']/(vminfo['uncommitted']+vminfo['committed']))|percentage}}%;">
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <div class="am-panel am-panel-primary">
+                <div class="am-panel-hd" id="panel-hostlist-head">物理机信息</div>
+                <div class="am-panel-bd" id="panel-hostlist-body">
+                    <table class="am-table">
+                        <thead>
+                            <tr>
+                                <td>名称</td>
+                                <td>集群</td>
+                                <td>CPU</td>
+                                <td>内存</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><a href="{{url_for('vsphere_host_detail')}}?hostid={{hostinfo.hostid}}">{{hostinfo.name}}</a></td>
+                                <td><a href="{{url_for('vsphere_host_home')}}?domainid={{hostinfo.parentid}}">{{hostinfo.parent}}</a></td>
+                                <td>{{hostinfo.cpu}}</td>
+                                <td>{{(hostinfo.memory/1024)|round}}GB</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+            <div class="am-panel am-panel-primary">
+                <div class="am-panel-hd" id="panel-niclist-head">
+                    网卡信息
+                    <span class="am-badge am-fr">{{vmnicinfo|length}}</span>
+                </div>
+                <div class="am-panel-bd" id="panel-niclist-body">
+                    <table class="am-table">
+                        <thead>
+                            <tr>
+                                <td>IP</td>
+                                <td>MAC地址</td>
+                                <td>Network类型</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {%for n in vmnicinfo%}
+                            <tr>
+                                <td><a href="{{url_for('vsphere_network_detail')}}?networkid={{n.networkid}}">{{n.ipaddress}}</a></td>
+                                <td>{{n.mac}}</td>
+                                <td>{{n.networktype}}</td>
+                            </tr>
+                            {%endfor%}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+<div style="text-align:center;">数据更新时间:{{version[1]}};</br>数据version id:{{version[0]}};</div>
+{% endblock %}
+{% block js %}
+<script language="JavaScript">
+    $(document).ready(function() {
+        //手工展开对应的主菜单
+        $("#sub-menu-vsphere").collapse('open');
+    });
+</script>
+{% endblock %}

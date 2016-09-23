@@ -19,9 +19,9 @@ class Util:
         ip2 = request.headers.get('X-Real-Ip')
         ip3 = request.remote_addr
         if ip1:
-            return ip1.splite(',')[0]
+            return ip1.split(',')[0]
         elif ip2:
-            return ip2.splite(',')[0]
+            return ip2.split(',')[0]
         else:
             return ip3
 

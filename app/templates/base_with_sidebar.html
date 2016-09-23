@@ -26,10 +26,12 @@
         <ul class="am-list admin-sidebar-list">
             <li><a href="{{url_for('home')}}"><span class="am-icon-home"></span> 首页</a></li>
             <li class="admin-parent">
-                <a class="am-cf am-collapsed" data-am-collapse="{target: '#sub-menu1'}"><span class="am-icon-list"></span> 主菜单1 <span class="am-icon-angle-right am-fr am-margin-right"></span></a>
-                <ul class="am-list am-collapse admin-sidebar-sub" id="sub-menu1">
-                    <li><a href="#" class="am-cf"><span class="am-icon-check"></span> 子菜单1</a></li>
-                    <li><a href="#" class="am-cf"><span class="am-icon-check"></span> 子菜单2</a></li>
+                <a class="am-cf am-collapsed" data-am-collapse="{target: '#sub-menu-vsphere'}"><span class="am-icon-list"></span> VSphere <span class="am-icon-angle-right am-fr am-margin-right"></span></a>
+                <ul class="am-list am-collapse admin-sidebar-sub" id="sub-menu-vsphere">
+                    <li><a href="{{url_for('vsphere_vm_home')}}" class="am-cf"><span class="am-icon-check"></span> 虚拟机</a></li>
+                    <li><a href="{{url_for('vsphere_host_home')}}" class="am-cf"><span class="am-icon-check"></span> 物理机</a></li>
+                    <li><a href="{{url_for('vsphere_network_home')}}" class="am-cf"><span class="am-icon-check"></span> 网络</a></li>
+                    <li><a href="{{url_for('vsphere_datastore_home')}}" class="am-cf"><span class="am-icon-check"></span> 存储</a></li>
                 </ul>
             </li>
             <li class="admin-parent">

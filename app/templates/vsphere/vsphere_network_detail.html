@@ -1,0 +1,125 @@
+{% extends "base_with_sidebar.html" %}
+{% block header_btns %}
+    <a href="#" class="am-btn am-btn-secondary">
+        <i class="am-header-icon am-icon-user"></i>
+        <span class="am-header-nav-title">
+            账号
+        </span>
+    </a>
+    <a href="{{url_for('logout')}}" class="am-btn am-btn-secondary">
+        <i class="am-header-icon am-icon-power-off"></i>
+        <span class="am-header-nav-title">
+            退出
+        </span>
+    </a>
+{% endblock %}
+{% block content %}
+    <div class="admin-content-body">
+        <div class="am-cf am-padding am-padding-bottom-0">
+            <div class="am-fl am-g">
+                <span><font size="5">{{network.name}}</font></span>
+                <span class="am-badge am-badge-primary am-fr">{{network.net}}</span>
+                <span class="am-badge am-badge-primary am-fr">{{network.type}}</span>
+            </div>
+        </div>
+        <hr>
+        <div class="am-g">
+            <div class="am-u-sm-12">
+            <table class="am-table">
+            <tbody>
+                <tr class="info">
+                    <td>Network Name</td>
+                    <td>{{network.name}}</td>
+                </tr>
+                <tr class="">
+                    <td>Network Type</td>
+                    <td>{{network.type}}</td>
+                </tr>
+                <tr class="info">
+                    <td>Subnet</td>
+                    <td>{{network.net}}</td>
+                </tr>
+            </tbody>
+            </table>
+            <div class="am-panel am-panel-primary" id="panel-netwokrlist">
+                <div class="am-panel-hd" data-am-collapse="{parent: '#panel-netwokrlist', target: '#panel-netwokrlist-body'}">
+                    <span class="am-badge am-fr">{{network.known}}</span>IP 列表
+                </div>
+                <div class="am-panel-bd am-collapse" id="panel-netwokrlist-body">
+                    <table class="am-table">
+                        <thead>
+                            <tr>
+                                <td>IP</td>
+                                <td>主机名</td>
+                                <td>项目名</td>
+                                <td>区域名</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for k, v in network.knownnetwork.items() | sort(attribute='1.ipsquence')%}
+                            <tr class="onerow" id="networklist-{{v[0]}}">
+                                <td>{{k}}</td>
+                                <td><a href="{{url_for('vsphere_vm_detail')}}?vmid={{v.id}}">{{v.name}}</a></td>
+                                {% if v.pid%}
+                                <td><a href="{{url_for('vsphere_vm_list')}}?vmfid={{v.pid}}">{{v.pname}}</a></td>
+                                <td><a href="{{url_for('vsphere_project_list')}}?vmfid={{v.zid}}">{{v.zname}}</a></td>
+                                {% elif v.zid %}
+                                <td>未分组虚拟机</td>
+                                <td><a href="{{url_for('vsphere_project_list')}}?vmfid={{v.zid}}">{{v.zname}}</a></td>
+                                {% else %}
+                                <td></td>
+                                <td></td>
+                                {% endif %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="am-panel am-panel-primary" id="panel-networkunknownlist">
+                <div class="am-panel-hd" data-am-collapse="{parent: '#panel-networkunknownlist', target: '#panel-networkunknownlist-body'}">
+                    IP未识别主机列表
+                    <span class="am-badge am-fr">{{network.unknownnetwork|length}}</span>
+                </div>
+                <div class="am-panel-bd am-collapse" id="panel-networkunknownlist-body">
+                    <table class="am-table">
+                        <thead>
+                            <tr>
+                                <td>主机名</td>
+                                <td>项目名</td>
+                                <td>区域名</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for v in network.unknownnetwork | sort %}
+                            <tr class="onerow" id="networkunknownlist-{{v[2]}}">
+                                <td ><a href="{{url_for('vsphere_vm_detail')}}?vmid={{v.id}}">{{v.name}}</a></td>
+                                {% if v.pid%}
+                                <td><a href="{{url_for('vsphere_vm_list')}}?vmfid={{v.pid}}">{{v.pname}}</a></td>
+                                <td><a href="{{url_for('vsphere_project_list')}}?vmfid={{v.zid}}">{{v.zname}}</a></td>
+                                {% elif v.zid %}
+                                <td>未分组虚拟机</td>
+                                <td><a href="{{url_for('vsphere_project_list')}}?vmfid={{v.zid}}">{{v.zname}}</a></td>
+                                {% else %}
+                                <td></td>
+                                <td></td>
+                                {% endif %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+<div style="text-align:center;">数据更新时间:{{version.synctime}};</br>数据version id:{{version.id}};</div>
+{% endblock %}
+{% block js %}
+<script language="JavaScript">
+    $(document).ready(function() {
+        //手工展开对应的主菜单
+        $("#sub-menu-vsphere").collapse('open');
+    });
+</script>
+{% endblock %}

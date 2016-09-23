@@ -3,10 +3,11 @@
 from . import db
 from Role import Role
 
-#用户
+
+# 用户
 class User(db.Model):
-    id = db.Column(db.Integer,primary_key=True)
-    name = db.Column(db.String(255),unique=True)
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255), unique=True)
     password = db.Column(db.String(255))
     active = db.Column(db.Boolean())
     email = db.Column(db.String(255))

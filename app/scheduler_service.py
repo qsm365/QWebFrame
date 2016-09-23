@@ -29,6 +29,16 @@ class SchedulerService:
         if every and period:
             dse.interval = IntervalSchedule(every=every, period=period)
         elif minute or hour or day_of_week or day_of_month or month_of_year:
+            if minute == "":
+                minute = "*"
+            if hour == "":
+                hour = "*"
+            if day_of_week == "":
+                day_of_week = "*"
+            if day_of_month == "":
+                day_of_month = "*"
+            if month_of_year == "":
+                month_of_year = "*"
             dse.crontab = CrontabSchedule(minute=minute, hour=hour, day_of_week=day_of_week, day_of_month=day_of_month, month_of_year=month_of_year)
         db.session.add(dse)
         db.session.commit()
@@ -36,6 +46,10 @@ class SchedulerService:
     @staticmethod
     def del_schedule(sid):
         dse = DatabaseSchedulerEntry.query.get(sid)
+        if dse.interval:
+            db.session.delete(dse.interval)
+        if dse.crontab:
+            db.session.delete(dse.crontab)
         db.session.delete(dse)
         db.session.commit()
 

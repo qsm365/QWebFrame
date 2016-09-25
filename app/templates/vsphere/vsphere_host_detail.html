@@ -1,18 +1,4 @@
 {% extends "base_with_sidebar.html" %}
-{% block header_btns %}
-    <a href="#" class="am-btn am-btn-secondary">
-        <i class="am-header-icon am-icon-user"></i>
-        <span class="am-header-nav-title">
-            账号
-        </span>
-    </a>
-    <a href="{{url_for('logout')}}" class="am-btn am-btn-secondary">
-        <i class="am-header-icon am-icon-power-off"></i>
-        <span class="am-header-nav-title">
-            退出
-        </span>
-    </a>
-{% endblock %}
 {% block content %}
 <div class="admin-content-body">
         <div class="am-cf am-padding am-padding-bottom-0">
@@ -72,8 +58,8 @@
                         <thead>
                             <tr>
                                 <td>虚拟机名称</td>
-                                <td>项目</td>
-                                <td>状态</td>
+                                <td class="am-hide-sm-only">项目</td>
+                                <td class="am-hide-sm-only">状态</td>
                                 <td>CPU</td>
                                 <td>内存</td>
                             </tr>
@@ -82,8 +68,8 @@
                             {%for vm in hostinfo.vms%}
                             <tr>
                                 <td><a href="{{url_for('vsphere_vm_detail')}}?vmid={{vm.vmid}}">{{vm.name}}</a></td>
-                                <td><a href="{{url_for('vsphere_vm_list')}}?vmfid={{vm.parentid}}">{{vm.parent}}</a></td>
-                                <td>{{vm.state}}</td>
+                                <td class="am-hide-sm-only"><a href="{{url_for('vsphere_vm_list')}}?vmfid={{vm.parentid}}">{{vm.parent}}</a></td>
+                                <td class="am-hide-sm-only">{{vm.state}}</td>
                                 <td>{{vm.cpu}}</td>
                                 <td>{{vm.memory/1024}} GB</td>
                             </tr>
@@ -95,7 +81,14 @@
             </div>
         </div>
     </div>
-<div style="text-align:center;">数据更新时间:{{version[1]}};</br>数据version id:{{version[0]}};</div>
+    <footer class="admin-content-footer">
+        <hr>
+        <p class="am-padding-left">
+            数据更新时间: {{version.synctime}}
+            <br>
+            数据version id: {{version.id}}
+        </p>
+    </footer>
 {% endblock %}
 {% block js %}
 <script language="JavaScript">

@@ -1,18 +1,4 @@
 {% extends "base_with_sidebar.html" %}
-{% block header_btns %}
-    <a href="#" class="am-btn am-btn-secondary">
-        <i class="am-header-icon am-icon-user"></i>
-        <span class="am-header-nav-title">
-            账号
-        </span>
-    </a>
-    <a href="{{url_for('logout')}}" class="am-btn am-btn-secondary">
-        <i class="am-header-icon am-icon-power-off"></i>
-        <span class="am-header-nav-title">
-            退出
-        </span>
-    </a>
-{% endblock %}
 {% block content %}
     <div class="admin-content-body">
         <div class="am-cf am-padding am-padding-bottom-0">

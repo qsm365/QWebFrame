@@ -1,56 +1,41 @@
 {% extends "base.html" %}
 
-{% block header_btns %}
-<a href="#" class="am-btn am-btn-secondary">
-    <i class="am-header-icon am-icon-user"></i>
-    <span class="am-header-nav-title">
-        账号
-    </span>
-</a>
-<a href="{{url_for('logout')}}" class="am-btn am-btn-secondary">
-    <i class="am-header-icon am-icon-power-off"></i>
-    <span class="am-header-nav-title">
-        退出
-    </span>
-</a>
-{% endblock %}
+
 
 {% block sidebar %}
-
-<link rel="stylesheet" href="{{ url_for('static', filename='assets/css/admin.css') }}">
 
 <div class="am-cf admin-main">
     <!-- sidebar start -->
     <div class="admin-sidebar am-offcanvas" id="admin-offcanvas">
-    <div class="am-offcanvas-bar admin-offcanvas-bar">
-        <ul class="am-list admin-sidebar-list">
-            <li><a href="{{url_for('home')}}"><span class="am-icon-home"></span> 首页</a></li>
-            <li class="admin-parent">
-                <a class="am-cf am-collapsed" data-am-collapse="{target: '#sub-menu-vsphere'}"><span class="am-icon-list"></span> VSphere <span class="am-icon-angle-right am-fr am-margin-right"></span></a>
-                <ul class="am-list am-collapse admin-sidebar-sub" id="sub-menu-vsphere">
-                    <li><a href="{{url_for('vsphere_vm_home')}}" class="am-cf"><span class="am-icon-check"></span> 虚拟机</a></li>
-                    <li><a href="{{url_for('vsphere_host_home')}}" class="am-cf"><span class="am-icon-check"></span> 物理机</a></li>
-                    <li><a href="{{url_for('vsphere_network_home')}}" class="am-cf"><span class="am-icon-check"></span> 网络</a></li>
-                    <li><a href="{{url_for('vsphere_datastore_home')}}" class="am-cf"><span class="am-icon-check"></span> 存储</a></li>
-                </ul>
-            </li>
-            <li class="admin-parent">
-                <a class="am-cf am-collapsed" data-am-collapse="{target: '#sub-menu-task'}"><span class="am-icon-list"></span> 定时任务 <span class="am-icon-angle-right am-fr am-margin-right"></span></a>
-                <ul class="am-list am-collapse admin-sidebar-sub" id="sub-menu-task">
-                    <li><a href="{{url_for('task_config')}}" class="am-cf"><span class="am-icon-bell"></span> 任务配置</a></li>
-                    <li><a href="{{url_for('task_his')}}" class="am-cf"><span class="am-icon-calendar"></span> 执行记录</a></li>
-                </ul>
-            </li>
-            <li class="admin-parent">
-                <a class="am-cf am-collapsed" data-am-collapse="{target: '#sub-menu-user'}"><span class="am-icon-list"></span> 用户与权限 <span class="am-icon-angle-right am-fr am-margin-right"></span></a>
-                <ul class="am-list am-collapse admin-sidebar-sub" id="sub-menu-user">
-                    <li><a href="{{url_for('admin_user')}}" class="am-cf"><span class="am-icon-users"></span> 用户</a></li>
-                    <li><a href="{{url_for('admin_role')}}" class="am-cf"><span class="am-icon-key"></span> 权限</a></li>
-                    <li><a href="{{url_for('login_his')}}" class="am-cf"><span class="am-icon-list-ol"></span> 登录记录</a></li>
-                </ul>
-            </li>
-        </ul>
-    </div>
+        <div class="am-offcanvas-bar admin-offcanvas-bar am-offcanvas-bar-overlay">
+            <ul class="am-list admin-sidebar-list">
+                <li><a href="{{url_for('home')}}"><span class="am-icon-home"></span> 首页</a></li>
+                <li class="admin-parent">
+                    <a class="am-cf am-collapsed" data-am-collapse="{target: '#sub-menu-vsphere'}"><span class="am-icon-list"></span> VSphere <span class="am-icon-angle-right am-fr am-margin-right"></span></a>
+                    <ul class="am-list am-collapse admin-sidebar-sub" id="sub-menu-vsphere">
+                        <li><a href="{{url_for('vsphere_vm_home')}}" class="am-cf"><span class="am-icon-tv"></span> 虚拟机</a></li>
+                        <li><a href="{{url_for('vsphere_host_home')}}" class="am-cf"><span class="am-icon-server"></span> 物理机</a></li>
+                        <li><a href="{{url_for('vsphere_network_home')}}" class="am-cf"><span class="am-icon-sitemap"></span> 网络</a></li>
+                        <li><a href="{{url_for('vsphere_datastore_home')}}" class="am-cf"><span class="am-icon-database"></span> 存储</a></li>
+                    </ul>
+                </li>
+                <li class="admin-parent">
+                    <a class="am-cf am-collapsed" data-am-collapse="{target: '#sub-menu-task'}"><span class="am-icon-list"></span> 定时任务 <span class="am-icon-angle-right am-fr am-margin-right"></span></a>
+                    <ul class="am-list am-collapse admin-sidebar-sub" id="sub-menu-task">
+                        <li><a href="{{url_for('task_config')}}" class="am-cf"><span class="am-icon-bell"></span> 任务配置</a></li>
+                        <li><a href="{{url_for('task_his')}}" class="am-cf"><span class="am-icon-calendar"></span> 执行记录</a></li>
+                    </ul>
+                </li>
+                <li class="admin-parent">
+                    <a class="am-cf am-collapsed" data-am-collapse="{target: '#sub-menu-user'}"><span class="am-icon-list"></span> 用户与权限 <span class="am-icon-angle-right am-fr am-margin-right"></span></a>
+                    <ul class="am-list am-collapse admin-sidebar-sub" id="sub-menu-user">
+                        <li><a href="{{url_for('admin_user')}}" class="am-cf"><span class="am-icon-users"></span> 用户</a></li>
+                        <li><a href="{{url_for('admin_role')}}" class="am-cf"><span class="am-icon-key"></span> 权限</a></li>
+                        <li><a href="{{url_for('login_his')}}" class="am-cf"><span class="am-icon-list-ol"></span> 登录记录</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
     </div>
     <!-- sidebar end -->
     <!-- content start -->

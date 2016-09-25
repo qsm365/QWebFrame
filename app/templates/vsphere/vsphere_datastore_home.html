@@ -1,18 +1,4 @@
 {% extends "base_with_sidebar.html" %}
-{% block header_btns %}
-    <a href="#" class="am-btn am-btn-secondary">
-        <i class="am-header-icon am-icon-user"></i>
-        <span class="am-header-nav-title">
-            账号
-        </span>
-    </a>
-    <a href="{{url_for('logout')}}" class="am-btn am-btn-secondary">
-        <i class="am-header-icon am-icon-power-off"></i>
-        <span class="am-header-nav-title">
-            退出
-        </span>
-    </a>
-{% endblock %}
 {% block content %}
     <div class="admin-content-body">
         <div class="am-cf am-padding am-padding-bottom-0">
@@ -29,10 +15,10 @@
                         <tr>
                             <td>存储名称</td>
                             <td>容量</td>
-                            <td>可用空间</td>
-                            <td>制备空间</td>
+                            <td class="am-hide-sm-only">可用空间</td>
+                            <td class="am-hide-sm-only">制备空间</td>
                             <td>使用率</td>
-                            <td>制备率</td>
+                            <td class="am-hide-sm-only">制备率</td>
                         </tr>
                     </thead>
                     <tbody>
@@ -40,10 +26,10 @@
                         <tr class="onerow" id="{{d[1]}}">
                             <td><a href="#">{{d.name}}</a></td>
                             <td>{{d.capacity|adjustnum}}</td>
-                            <td>{{d.freespace|adjustnum}}</td>
-                            <td>{{(d.capacity-d.freespace+d.uncommitted)|adjustnum}}</td>
+                            <td class="am-hide-sm-only">{{d.freespace|adjustnum}}</td>
+                            <td class="am-hide-sm-only">{{(d.capacity-d.freespace+d.uncommitted)|adjustnum}}</td>
                             <td>{{(1-d.freespace/d.capacity)|percentage}}</td>
-                            <td>{{((d.capacity-d.freespace+d.uncommitted)/d.capacity)|percentage}}</td>
+                            <td class="am-hide-sm-only">{{((d.capacity-d.freespace+d.uncommitted)/d.capacity)|percentage}}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -51,7 +37,14 @@
             </div>
         </div>
     </div>
-<div style="text-align:center;">数据更新时间:{{version.synctime}};</br>数据version id:{{version.id}};</div>
+    <footer class="admin-content-footer">
+        <hr>
+        <p class="am-padding-left">
+            数据更新时间: {{version.synctime}}
+            <br>
+            数据version id: {{version.id}}
+        </p>
+    </footer>
 {% endblock %}
 {% block js %}
 <script language="JavaScript">

@@ -1,20 +1,5 @@
 {% extends "base_with_sidebar.html" %}
 
-{% block header_btns %}
-    <a href="#" class="am-btn am-btn-secondary">
-        <i class="am-header-icon am-icon-user"></i>
-        <span class="am-header-nav-title">
-            账号
-        </span>
-    </a>
-    <a href="{{url_for('logout')}}" class="am-btn am-btn-secondary">
-        <i class="am-header-icon am-icon-power-off"></i>
-        <span class="am-header-nav-title">
-            退出
-        </span>
-    </a>
-{% endblock %}
-
 {% block content %}
     <div class="admin-content-body">
         <div class="am-cf am-padding am-padding-bottom-0">
@@ -42,6 +27,7 @@
                             <th class="table-title">用户名</th>
                             <th class="table-title">Email</th>
                             <th class="table-title am-hide-sm-only">角色</th>
+                            <th class="table-title am-hide-sm-only">激活</th>
                             <th class="table-title am-hide-sm-only">登陆数</th>
                             <th class="table-set">操作</th>
                         </tr>
@@ -80,7 +66,7 @@
             </div>
             <form id="editUserForm" action="" class="am-form">
             <div class="am-modal-bd">
-                    <fieldset>
+                <fieldset>
                         <div class="am-form-group">
                             <input type="text" id="editUserName" minlength="3"
                                    disabled="disabled"/>
@@ -94,7 +80,7 @@
                                    placeholder="重复用户新密码"/>
                         </div>
                         <div class="am-form-group">
-                            <input type="text" id="editUserEmail" data-foolish-msg="请输入正确的用户邮箱"
+                            <input type="email" id="editUserEmail" data-foolish-msg="请输入正确的用户邮箱"
                                    placeholder="输入用户新邮箱，不输入则不修改"/>
                         </div>
                         <div class="am-form-group">
@@ -103,9 +89,14 @@
                             </select>
                             <span class="am-form-caret"></span>
                         </div>
-                    </fieldset>
-                    <input type="hidden" id="editUserId"/>
-                    <button class="am-btn am-btn-default" type="submit">确定</button>
+                        <div class="am-form-group am-u-sm-3">
+                            <label class="am-checkbox">
+                                <input id="editUserActive" type="checkbox" checked="checked" value="" data-am-ucheck> 激活
+                            </label>
+                        </div>
+                </fieldset>
+                <input type="hidden" id="editUserId"/>
+                <button class="am-btn am-btn-default" type="submit">确定</button>
             </div>
             </form>
         </div>
@@ -132,7 +123,7 @@
                                    placeholder="重复用户密码" required/>
                         </div>
                         <div class="am-form-group">
-                            <input type="text" id="createUserEmail" minlength="3" data-foolish-msg="请输入正确的用户邮箱"
+                            <input type="email" id="createUserEmail" minlength="3" data-foolish-msg="请输入正确的用户邮箱"
                                    placeholder="输入用户邮箱" required/>
                         </div>
                         <div class="am-form-group">
@@ -140,6 +131,11 @@
                                 <option value="">选择角色</option>
                             </select>
                             <span class="am-form-caret"></span>
+                        </div>
+                        <div class="am-form-group am-u-sm-3">
+                            <label class="am-checkbox">
+                                <input id="createUserActive" type="checkbox" checked="checked" value="" data-am-ucheck> 激活
+                            </label>
                         </div>
                     </fieldset>
                     <button class="am-btn am-btn-default" type="submit">确定</button>
@@ -197,12 +193,17 @@
                         }
                         user_email = $('#editUserEmail').val();
                         role_id = $('#editRoleId').val();
+                        if($('#editUserActive').is(':checked')){
+                            active=1
+                        }else{
+                            active=0
+                        }
                         console.log("edit user:"+user_id+";"+user_pass+";"+user_email+";"+role_id);
                         $('#editUserModal').modal('close');
-                        edit_user(user_id, user_pass, user_email, role_id);
+                        edit_user(user_id, user_pass, user_email, role_id, active);
                     }else{
                         $('#editUserPassword2').removeClass('am-field-valid');
-                        $('#editUserPassword2').parent().addClass('am-form-success');
+                        $('#editUserPassword2').parent().removeClass('am-form-success');
                         $('#editUserPassword2').addClass('am-field-error');
                         $('#editUserPassword2').parent().addClass('am-form-error');
                     }
@@ -221,11 +222,16 @@
                         user_pass = hex_sha1($('#createUserPassword').val());
                         user_email = $('#createUserEmail').val();
                         role_id = $('#createRoleId').val();
+                        if($('#createUserActive').is(':checked')){
+                            active=1
+                        }else{
+                            active=0
+                        }
                         $('#createUserModal').modal('close');
-                        create_user(user_name,user_pass,user_email,role_id);
+                        create_user(user_name,user_pass,user_email,role_id,active);
                     }else{
                         $('#createUserPassword2').removeClass('am-field-valid');
-                        $('#createUserPassword2').parent().addClass('am-form-success');
+                        $('#createUserPassword2').parent().removeClass('am-form-success');
                         $('#createUserPassword2').addClass('am-field-error');
                         $('#createUserPassword2').parent().addClass('am-form-error');
                     }
@@ -234,13 +240,13 @@
             }
         });
     });
-    function edit_user(user_id, user_pass, user_email, role_id){
+    function edit_user(user_id, user_pass, user_email, role_id, active){
         $.AMUI.progress.start();
         console.log("start edit user");
         jQuery.ajax({
             url: "{{url_for('admin_user__user')}}",
             dataType: "json",
-            data: {"id": user_id, "password":user_pass, "email":user_email,"roleId":role_id},
+            data: {"id": user_id, "password":user_pass, "email":user_email,"roleId":role_id,"active":active},
             type: "POST",
             timeout : timeout,
             success: function(response) {
@@ -259,13 +265,13 @@
             }
         });
     }
-    function create_user(user_name,user_pass,user_email,role_id){
+    function create_user(user_name,user_pass,user_email,role_id,active){
         $.AMUI.progress.start();
         console.log("start create user");
         jQuery.ajax({
             url: "{{url_for('admin_user__user')}}",
             dataType: "json",
-            data: {"username": user_name, "password":user_pass, "email":user_email,"roleId":role_id},
+            data: {"username": user_name, "password":user_pass, "email":user_email,"roleId":role_id,"active":active},
             type: "PUT",
             timeout : timeout,
             success: function(response) {
@@ -310,6 +316,7 @@
                             '<td>'+e.name+'</td>'+
                             '<td>'+e.email+'</td>'+
                             '<td class="am-hide-sm-only">'+e.role_alias+'</td>'+
+                            '<td class="am-hide-sm-only">'+e.active+'</td>'+
                             '<td class="am-hide-sm-only">'+e.login_count+'</td>'+
                             '<td>'+
                             '    <div class="am-btn-toolbar">'+
@@ -317,6 +324,7 @@
                             '            <input type="hidden" class="user_id" value="'+e.id+'"/>'+
                             '            <input type="hidden" class="user_name" value="'+e.name+'"/>'+
                             '            <input type="hidden" class="role_id" value="'+e.role_id+'"/>'+
+                            '            <input type="hidden" class="user_active" value="'+e.active+'"/>'+
                             '            <button class="edit am-btn am-btn-default am-btn-xs am-text-secondary"><span class="am-icon-pencil-square-o am-icon-fw"></span> 编辑</button>'+
                             '            <button class="delete am-btn am-btn-default am-btn-xs am-text-danger am-hide-sm-only"><span class="am-icon-trash-o am-icon-fw"></span> 删除</button>'+
                             '        </div>'+
@@ -399,6 +407,7 @@
             user_id = $(this).parent().children('.user_id').val();
             user_name = $(this).parent().children('.user_name').val();
             role_id = $(this).parent().children('.role_id').val();
+            active = $(this).parent().children('.user_active').val();
             console.log('edit:'+user_id)
             $('#editUserId').val(user_id)
             $('#editUserName').val(user_name)
@@ -406,6 +415,11 @@
             $('#editUserPassword2').val('')
             $('#editUserEmail').val('')
             $('#editRoleId').val(role_id)
+            if(active=="true"){
+                $('#editUserActive').uCheck('check')
+            }else{
+                $('#editUserActive').uCheck('uncheck')
+            }
             $('#editUserModal').modal({
                 width: 400,
                 dimmer:false

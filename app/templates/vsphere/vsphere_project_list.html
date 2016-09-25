@@ -1,25 +1,9 @@
 {% extends "base_with_sidebar.html" %}
-{% block header_btns %}
-    <a href="#" class="am-btn am-btn-secondary">
-        <i class="am-header-icon am-icon-user"></i>
-        <span class="am-header-nav-title">
-            账号
-        </span>
-    </a>
-    <a href="{{url_for('logout')}}" class="am-btn am-btn-secondary">
-        <i class="am-header-icon am-icon-power-off"></i>
-        <span class="am-header-nav-title">
-            退出
-        </span>
-    </a>
-{% endblock %}
 {% block content %}
     <div class="admin-content-body">
         <div class="am-cf am-padding am-padding-bottom-0">
             <div class="am-fl am-cf">
-                <span>
-                    <font size="5">{{folders.name}}</font>
-                </span>
+                <strong class="am-text-primary am-text-lg">{{folders.name}}</strong>
                 <span class="am-badge am-badge-primary">项目数量:{{folders.project_number}}</span>
                 <span class="am-badge am-badge-primary">虚拟机数量:{{folders.vm_number}}</span>
             </div>
@@ -50,7 +34,14 @@
             </div>
         </div>
     </div>
-<div style="text-align:center;">数据更新时间:{{version.synctime}};</br>数据version id:{{version.id}};</div>
+    <footer class="admin-content-footer">
+        <hr>
+        <p class="am-padding-left">
+            数据更新时间: {{version.synctime}}
+            <br>
+            数据version id: {{version.id}}
+        </p>
+    </footer>
 {% endblock %}
 {% block js %}
 <script language="JavaScript">

@@ -281,7 +281,6 @@ class VsphereService:
                 if ip:
                     known += 1
                     knownnetwork[ip] = r
-                    print r
                 else:
                     unknownnetwork.append(r)
             ret['known'] = known
@@ -290,7 +289,6 @@ class VsphereService:
             ret['name'] = networkinfo.name
             ret['type'] = networkinfo.networktype
 
-            print ret
             return ret
 
     @staticmethod

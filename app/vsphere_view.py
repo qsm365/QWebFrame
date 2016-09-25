@@ -5,6 +5,7 @@ from . import app
 from vsphere_service import VsphereService
 from vsphere_client import VsphereClient
 from decorator.user import login_required,privilege
+from decorator.vsphere import get_last_version
 
 vsphereProfile = Blueprint('vsphereProfile', __name__)
 
@@ -29,8 +30,8 @@ def vsphere_performance_json():
 @app.route('/vsphere/performance/detail',methods=['GET'])
 @login_required()
 @privilege('vsphere')
-def vsphere_performance_detail():
-    version = vsphereService.get_new_version()
+@get_last_version()
+def vsphere_performance_detail(version):
     ver = version.id
     if not request.args.get('type'):
         return redirect(url_for('vsphere_vm_home'))
@@ -71,11 +72,11 @@ def vsphere_performance_detail():
 @app.route('/vsphere/host/detail',methods=['GET'])
 @login_required()
 @privilege('vsphere')
-def vsphere_host_detail():
+@get_last_version()
+def vsphere_host_detail(version):
     if not request.args.get('hostid'):
         return redirect(url_for('vsphere_host_list'))
     hostid = request.args.get('hostid')
-    version = vsphereService.get_new_version()
     ver = version.id
     hostinfo = vsphereService.get_host_detail_by_hostid(ver, hostid)
     return render_template('vsphere/vsphere_host_detail.html', title='VSpher Host', version=version, hostinfo=hostinfo)
@@ -84,9 +85,9 @@ def vsphere_host_detail():
 @app.route('/vsphere/host',methods=['GET'])
 @login_required()
 @privilege('vsphere')
-def vsphere_host_home():
+@get_last_version()
+def vsphere_host_home(version):
     domainid = request.args.get('domainid')
-    version = vsphereService.get_new_version()
     ver = version.id
     hostinfo = vsphereService.get_host_list_by_domainid(ver, domainid)
     domains = vsphereService.get_host_domain_list(ver)
@@ -99,8 +100,8 @@ def vsphere_host_home():
 @app.route('/vsphere/datastore')
 @login_required()
 @privilege('vsphere')
-def vsphere_datastore_home():
-    version = vsphereService.get_new_version()
+@get_last_version()
+def vsphere_datastore_home(version):
     ver = version.id
     datastoreinfo = vsphereService.get_all_datastore(ver)
     return render_template('vsphere/vsphere_datastore_home.html', title='VSpher Datastore List', version=version,
@@ -110,11 +111,11 @@ def vsphere_datastore_home():
 @app.route('/vsphere/network/detail',methods = ['GET'])
 @login_required()
 @privilege('vsphere')
-def vsphere_network_detail():
+@get_last_version()
+def vsphere_network_detail(version):
     if not request.args.get('networkid'):
         return redirect(url_for('vsphere_network_home'))
     networkid = request.args.get('networkid')
-    version = vsphereService.get_new_version()
     ver = version.id
     network = vsphereService.get_networkinfo_by_networkid(ver, networkid)
     return render_template('vsphere/vsphere_network_detail.html', title='VSpher Network List', version=version,
@@ -124,8 +125,8 @@ def vsphere_network_detail():
 @app.route('/vsphere/network',methods = ['GET'])
 @login_required()
 @privilege('vsphere')
-def vsphere_network_home():
-    version = vsphereService.get_new_version()
+@get_last_version()
+def vsphere_network_home(version):
     ver = version.id
     networks = vsphereService.get_all_networks(ver)
     return render_template('vsphere/vsphere_network_home.html', title='VSpher Network', version=version, networks=networks)
@@ -134,9 +135,9 @@ def vsphere_network_home():
 @app.route('/vsphere/vm/map',methods=['GET'])
 @login_required()
 @privilege('vsphere')
-def vsphere_vm_map():
+@get_last_version()
+def vsphere_vm_map(version):
     dcid = request.args.get('dcid', 'datacenter-2')
-    version = vsphereService.get_new_version()
     ver = version.id
     dcmap = vsphereService.get_vm_map(ver, dcid)
     return render_template('vsphere/vsphere_vm_map.html', title='VSpher VM Map', version=version, dcmap=dcmap)
@@ -145,9 +146,9 @@ def vsphere_vm_map():
 @app.route('/vsphere/project/map',methods=['GET'])
 @login_required()
 @privilege('vsphere')
-def vsphere_project_map():
+@get_last_version()
+def vsphere_project_map(version):
     dcid = request.args.get('dcid', 'datacenter-2')
-    version = vsphereService.get_new_version()
     ver = version.id
     dcmap = vsphereService.get_project_map(ver, dcid)
     return render_template('vsphere/vsphere_project_map.html', title='VSpher Project Map', version=version, dcmap=dcmap)
@@ -156,11 +157,11 @@ def vsphere_project_map():
 @app.route('/vsphere/vm/detail',methods = ['GET'])
 @login_required()
 @privilege('vsphere')
-def vsphere_vm_detail():
+@get_last_version()
+def vsphere_vm_detail(version):
     if not request.args.get('vmid'):
         return redirect(url_for('vsphere_vm_home'))
     vmid = request.args.get('vmid')
-    version = vsphereService.get_new_version()
     ver = version.id
     info = vsphereService.get_vm_detail_from_vmid(ver, vmid)
     zoneinfo = info['zone']
@@ -175,11 +176,11 @@ def vsphere_vm_detail():
 @app.route('/vsphere/vm/list',methods = ['GET'])
 @login_required()
 @privilege('vsphere')
-def vsphere_vm_list():
+@get_last_version()
+def vsphere_vm_list(version):
     if not request.args.get('vmfid'):
         return redirect(url_for('vsphere_vm_home'))
     vmfid=request.args.get('vmfid')
-    version = vsphereService.get_new_version()
     ver = version.id
     folder = vsphereService.get_folder(ver, vmfid)
     vms = vsphereService.get_child_vm(ver, vmfid)
@@ -189,11 +190,11 @@ def vsphere_vm_list():
 @app.route('/vsphere/vm/project/list',methods = ['GET'])
 @login_required()
 @privilege('vsphere')
-def vsphere_project_list():
+@get_last_version()
+def vsphere_project_list(version):
     if not request.args.get('vmfid'):
         return redirect(url_for('vsphere_vm_home'))
     vmfid=request.args.get('vmfid')
-    version = vsphereService.get_new_version()
     ver = version.id
     folders = vsphereService.get_project_list(ver, vmfid)
     return render_template('vsphere/vsphere_project_list.html', title='VSpher Project List', version=version,
@@ -203,9 +204,9 @@ def vsphere_project_list():
 @app.route('/vsphere/vm', methods = ['GET'])
 @login_required()
 @privilege('vsphere')
-def vsphere_vm_home():
+@get_last_version()
+def vsphere_vm_home(version):
     dcid = request.args.get('dcid','datacenter-2')
-    version = vsphereService.get_new_version()
     ver = version.id
     dcs = vsphereService.get_all_datacenters(ver)
     dcinfo = vsphereService.get_dcinfo_by_dcid(ver, dcid)

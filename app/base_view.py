@@ -111,7 +111,7 @@ def create_user():
 @privilege('home')
 def home():
     #show index
-    return render_template('index.html')
+    return render_template('index.html', title=u'首页')
 
 
 @app.route('/admin-user', methods=['GET'])
@@ -132,7 +132,7 @@ def admin_user__user():
         if util.can_tune_to(page, int):
             ret = dict()
             ret['result'] = 1
-            pager = userService.get_user(query).paginate(int(page), perPage, False)
+            pager = userService.get_users(query).paginate(int(page), perPage, False)
             #'has_next', 'has_prev', 'items', 'iter_pages', 'next', 'next_num', 'page', 'pages', 'per_page', 'prev', 'prev_num', 'query', 'total'
             user_list = pager.items
             data=dict()
@@ -148,9 +148,10 @@ def admin_user__user():
         password = request.values.get('password')
         email = request.values.get('email')
         role_id = request.values.get('roleId')
-        ret = {}
-        if userService.check_user(username, password, email):
-            userService.add_user(username, password, email, role_id)
+        active = request.values.get('active')
+        ret = dict()
+        if userService.check_user(username, password, email) and util.can_tune_to(active, int):
+            userService.add_user(username, password, email, role_id, active)
             ret['result'] = 1
         else:
             ret['result'] = 2
@@ -167,8 +168,9 @@ def admin_user__user():
         password = request.values.get('password')
         email = request.values.get('email')
         role_id = request.values.get('roleId')
-        if id and util.can_tune_to(id, int):
-            userService.mod_user(id, password, email, role_id)
+        active = request.values.get('active')
+        if id and util.can_tune_to(id, int) and util.can_tune_to(active, int):
+            userService.mod_user(id, password, email, role_id, active)
             ret = {}
             ret['result'] = 1
             return jsonify(ret)
@@ -456,4 +458,21 @@ def task_his__his():
             data['perPage'] = perPage
             ret['data'] = data
             return jsonify(ret)
+    return "error", 400
+
+
+@app.route('/user-center', methods=['GET', 'POST'])
+@login_required()
+def user_center():
+    if request.method == 'GET':
+        u = userService.get_user(session['userId'])
+        return render_template('user-center.html', title=u'用户中心', user=u)
+    elif request.method == 'POST':
+        user_id = session['userId']
+        password = request.values.get('password')
+        email = request.values.get('email')
+        userService.mod_user(user_id, password, email, None, None)
+        ret = dict()
+        ret['result'] = 1
+        return jsonify(ret), 200;
     return "error", 400

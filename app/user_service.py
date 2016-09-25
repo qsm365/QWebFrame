@@ -31,8 +31,8 @@ class UserService:
         return False
 
     @staticmethod
-    def add_user(username, password, email, role_id=default_role_id):
-        u = User(name=username, password=password, email=email, active=1, login_count=0)
+    def add_user(username, password, email, role_id=default_role_id, active=1):
+        u = User(name=username, password=password, email=email, active=active, login_count=0)
         r = Role.query.get(role_id)
         if r:
             u.role = r
@@ -40,9 +40,14 @@ class UserService:
         db.session.commit()
 
     @staticmethod
-    def get_user(query):
+    def get_users(query):
         u = User.query.filter(or_(User.name.like("%" + query + "%") if query is not None else "",
                                   User.email.like("%" + query + "%") if query is not None else ""))
+        return u
+
+    @staticmethod
+    def get_user(user_id):
+        u = User.query.get(user_id)
         return u
 
     @staticmethod
@@ -52,7 +57,7 @@ class UserService:
         db.session.commit()
 
     @staticmethod
-    def mod_user(user_id, password, email, role_id):
+    def mod_user(user_id, password, email, role_id, active):
         u = User.query.get(user_id)
         if password:
             u.password = password
@@ -62,6 +67,8 @@ class UserService:
             r = Role.query.get(role_id)
             if r:
                 u.role = r
+        if active != None:
+            u.active = active
         db.session.commit()
 
     @staticmethod

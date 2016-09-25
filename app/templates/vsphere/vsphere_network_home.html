@@ -1,18 +1,4 @@
 {% extends "base_with_sidebar.html" %}
-{% block header_btns %}
-    <a href="#" class="am-btn am-btn-secondary">
-        <i class="am-header-icon am-icon-user"></i>
-        <span class="am-header-nav-title">
-            账号
-        </span>
-    </a>
-    <a href="{{url_for('logout')}}" class="am-btn am-btn-secondary">
-        <i class="am-header-icon am-icon-power-off"></i>
-        <span class="am-header-nav-title">
-            退出
-        </span>
-    </a>
-{% endblock %}
 {% block content %}
     <div class="admin-content-body">
         <div class="am-cf am-padding am-padding-bottom-0">
@@ -28,16 +14,16 @@
                     <thead>
                         <tr>
                             <td>Network名称</td>
-                            <td>Network类型</td>
+                            <td class="am-hide-sm-only">Network类型</td>
                             <td class="am-fr">数量</td>
                         </tr>
                     </thead>
                     <tbody>
                         {% for n in networks| sort(attribute='name') %}
                         <tr class="onerow" id="{{n[0]}}">
-                            <td ><a href="{{url_for('vsphere_network_detail')}}?networkid={{n.id}}">{{n.name}}</a></td>
-                            <td ><span class="">{{n.type}}</span></td>
-                            <td ><span class="am-badge am-badge-primary am-fr">{{n.count}}</span></td>
+                            <td><a href="{{url_for('vsphere_network_detail')}}?networkid={{n.id}}">{{n.name}}</a></td>
+                            <td class="am-hide-sm-only"><span class="">{{n.type}}</span></td>
+                            <td><span class="am-badge am-badge-primary am-fr">{{n.count}}</span></td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -45,7 +31,14 @@
             </div>
         </div>
     </div>
-<div style="text-align:center;">数据更新时间:{{version[1]}};</br>数据version id:{{version[0]}};</div>
+    <footer class="admin-content-footer">
+        <hr>
+        <p class="am-padding-left">
+            数据更新时间: {{version.synctime}}
+            <br>
+            数据version id: {{version.id}}
+        </p>
+    </footer>
 {% endblock %}
 {% block js %}
 <script language="JavaScript">

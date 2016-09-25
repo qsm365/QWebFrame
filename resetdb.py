@@ -4,7 +4,6 @@ from app.model import db
 from app.role_service import RoleService
 from app.privilege_service import PrivilegeService
 from app.user_service import UserService
-from app.vsphere_sync import VsphereSync
 
 db.drop_all()
 db.create_all()
@@ -35,6 +34,7 @@ privilegeService.add_privilege('task_config__schedule',u'任务配置计划接�
 privilegeService.add_privilege('task_config__task',u'任务配置任务接口')
 privilegeService.add_privilege('task_his', u'执行记录')
 privilegeService.add_privilege('task_his__his', u'执行记录记录接口')
+privilegeService.add_privilege('vsphere', u'VSphere模块')
 
 privilegeService.link_role_privilege(1, 1, True, True)
 privilegeService.link_role_privilege(1, 2, True, True)
@@ -49,8 +49,9 @@ privilegeService.link_role_privilege(1, 10, True, True)
 privilegeService.link_role_privilege(1, 11, True, True)
 privilegeService.link_role_privilege(1, 12, True, True)
 privilegeService.link_role_privilege(1, 13, True, True)
+privilegeService.link_role_privilege(1, 14, True, True)
 
 privilegeService.link_role_privilege(2, 1, True, False)
 
-vsphereSync = VsphereSync()
-vsphereSync.sync()
+#vsphereSync = VsphereSync()
+#vsphereSync.sync()

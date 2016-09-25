@@ -1,25 +1,11 @@
 {% extends "base_with_sidebar.html" %}
-{% block header_btns %}
-    <a href="#" class="am-btn am-btn-secondary">
-        <i class="am-header-icon am-icon-user"></i>
-        <span class="am-header-nav-title">
-            账号
-        </span>
-    </a>
-    <a href="{{url_for('logout')}}" class="am-btn am-btn-secondary">
-        <i class="am-header-icon am-icon-power-off"></i>
-        <span class="am-header-nav-title">
-            退出
-        </span>
-    </a>
-{% endblock %}
 {% block content %}
     <div class="admin-content-body">
         <div class="am-cf am-padding am-padding-bottom-0">
             <div class="am-fl am-g">
                 <span><font size="5">{{network.name}}</font></span>
-                <span class="am-badge am-badge-primary am-fr">{{network.net}}</span>
-                <span class="am-badge am-badge-primary am-fr">{{network.type}}</span>
+                <span class="am-badge am-badge-primary am-fr am-hide-sm-only">{{network.net}}</span>
+                <span class="am-badge am-badge-primary am-fr am-hide-sm-only">{{network.type}}</span>
             </div>
         </div>
         <hr>
@@ -51,8 +37,8 @@
                             <tr>
                                 <td>IP</td>
                                 <td>主机名</td>
-                                <td>项目名</td>
-                                <td>区域名</td>
+                                <td class="am-hide-sm-only">项目名</td>
+                                <td class="am-hide-sm-only">区域名</td>
                             </tr>
                         </thead>
                         <tbody>
@@ -61,14 +47,14 @@
                                 <td>{{k}}</td>
                                 <td><a href="{{url_for('vsphere_vm_detail')}}?vmid={{v.id}}">{{v.name}}</a></td>
                                 {% if v.pid%}
-                                <td><a href="{{url_for('vsphere_vm_list')}}?vmfid={{v.pid}}">{{v.pname}}</a></td>
-                                <td><a href="{{url_for('vsphere_project_list')}}?vmfid={{v.zid}}">{{v.zname}}</a></td>
+                                <td class="am-hide-sm-only"><a href="{{url_for('vsphere_vm_list')}}?vmfid={{v.pid}}">{{v.pname}}</a></td>
+                                <td class="am-hide-sm-only"><a href="{{url_for('vsphere_project_list')}}?vmfid={{v.zid}}">{{v.zname}}</a></td>
                                 {% elif v.zid %}
-                                <td>未分组虚拟机</td>
-                                <td><a href="{{url_for('vsphere_project_list')}}?vmfid={{v.zid}}">{{v.zname}}</a></td>
+                                <td class="am-hide-sm-only">未分组虚拟机</td>
+                                <td class="am-hide-sm-only"><a href="{{url_for('vsphere_project_list')}}?vmfid={{v.zid}}">{{v.zname}}</a></td>
                                 {% else %}
-                                <td></td>
-                                <td></td>
+                                <td class="am-hide-sm-only"></td>
+                                <td class="am-hide-sm-only"></td>
                                 {% endif %}
                             </tr>
                             {% endfor %}
@@ -86,8 +72,8 @@
                         <thead>
                             <tr>
                                 <td>主机名</td>
-                                <td>项目名</td>
-                                <td>区域名</td>
+                                <td class="am-hide-sm-only">项目名</td>
+                                <td class="am-hide-sm-only">区域名</td>
                             </tr>
                         </thead>
                         <tbody>
@@ -95,14 +81,14 @@
                             <tr class="onerow" id="networkunknownlist-{{v[2]}}">
                                 <td ><a href="{{url_for('vsphere_vm_detail')}}?vmid={{v.id}}">{{v.name}}</a></td>
                                 {% if v.pid%}
-                                <td><a href="{{url_for('vsphere_vm_list')}}?vmfid={{v.pid}}">{{v.pname}}</a></td>
-                                <td><a href="{{url_for('vsphere_project_list')}}?vmfid={{v.zid}}">{{v.zname}}</a></td>
+                                <td class="am-hide-sm-only"><a href="{{url_for('vsphere_vm_list')}}?vmfid={{v.pid}}">{{v.pname}}</a></td>
+                                <td class="am-hide-sm-only"><a href="{{url_for('vsphere_project_list')}}?vmfid={{v.zid}}">{{v.zname}}</a></td>
                                 {% elif v.zid %}
-                                <td>未分组虚拟机</td>
-                                <td><a href="{{url_for('vsphere_project_list')}}?vmfid={{v.zid}}">{{v.zname}}</a></td>
+                                <td class="am-hide-sm-only">未分组虚拟机</td>
+                                <td class="am-hide-sm-only"><a href="{{url_for('vsphere_project_list')}}?vmfid={{v.zid}}">{{v.zname}}</a></td>
                                 {% else %}
-                                <td></td>
-                                <td></td>
+                                <td class="am-hide-sm-only"></td>
+                                <td class="am-hide-sm-only"></td>
                                 {% endif %}
                             </tr>
                             {% endfor %}
@@ -113,7 +99,14 @@
             </div>
         </div>
     </div>
-<div style="text-align:center;">数据更新时间:{{version.synctime}};</br>数据version id:{{version.id}};</div>
+    <footer class="admin-content-footer">
+        <hr>
+        <p class="am-padding-left">
+            数据更新时间: {{version.synctime}}
+            <br>
+            数据version id: {{version.id}}
+        </p>
+    </footer>
 {% endblock %}
 {% block js %}
 <script language="JavaScript">

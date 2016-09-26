@@ -3,9 +3,23 @@
     <div class="admin-content-body">
         <div class="am-cf am-padding am-padding-bottom-0">
             <div class="am-fl am-cf">
-                <strong class="am-text-primary am-text-lg">{{folders.name}}</strong>
-                <span class="am-badge am-badge-primary">项目数量:{{folders.project_number}}</span>
-                <span class="am-badge am-badge-primary">虚拟机数量:{{folders.vm_number}}</span>
+                <table style="display:inline-block;">
+                    <tr>
+                        <td>
+                            <strong class="am-text-primary am-text-xl">{{folders.name}}</strong>
+                        </td>
+                        <td class="am-hide-sm-only">&nbsp</td>
+                        <td class="am-hide-sm-only">
+                            <span class="am-badge am-badge-primary">项目数量:{{folders.project_number}}</span>
+                        </td>
+                        <td class="am-hide-sm-only">&nbsp</td>
+                        <td class="am-hide-sm-only">
+                            <span class="am-badge am-badge-primary">虚拟机数量:{{folders.vm_number}}</span>
+                        </td>
+                        <td width="50%">
+                        </td>
+                    </tr>
+                </table>
             </div>
         </div>
         <hr>

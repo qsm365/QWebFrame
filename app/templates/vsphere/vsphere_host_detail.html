@@ -3,9 +3,7 @@
 <div class="admin-content-body">
         <div class="am-cf am-padding am-padding-bottom-0">
             <div class="am-fl am-g">
-                <span>
-                    <font size="5">{{hostinfo.name}}</font>
-                </span>
+                <strong class="am-text-primary am-text-xl">{{hostinfo.name}}</strong>
                 <a class="am-btn am-btn-warning am-fr" href="{{url_for('vsphere_performance_detail')}}?type=host&moid={{hostinfo[1]}}">查看物理机性能</a>
             </div>
         </div>

@@ -3,8 +3,13 @@
     <div class="admin-content-body">
         <div class="am-cf am-padding am-padding-bottom-0">
             <div class="am-g">
-                <strong class="am-text-primary am-text-lg">物理机列表</strong>
-                <span class="am-badge am-badge-primary">物理机数量:{{hostinfo|length}}</span>
+                <table style="display:inline-block;">
+                    <tr>
+                        <td><strong class="am-text-primary am-text-xl">物理机列表</strong></td>
+                        <td class="am-hide-sm-only">&nbsp</td>
+                        <td class="am-hide-sm-only"><span class="am-badge am-badge-primary">物理机数量:{{hostinfo|length}}</span></td>
+                    </tr>
+                </table>
                 <div class="am-fr">
                     <span class="am-dropdown" data-am-dropdown>
                         <button class="am-btn am-btn-primary am-dropdown-toggle nopadding" type="button" data-toggle="dropdown">

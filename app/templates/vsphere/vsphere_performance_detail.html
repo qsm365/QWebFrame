@@ -3,9 +3,7 @@
     <div class="admin-content-body">
         <div class="am-cf am-padding am-padding-bottom-0">
             <div class="am-fl am-g">
-                <span>
-                    <font size="5">{{info.name}}</font>
-                </span>
+                <strong class="am-text-primary am-text-xl">{{info.name}}</strong>
 
                 {% if perftype == 'vm' %}
                 <a class="am-btn am-btn-warning am-fr" href="{{url_for('vsphere_vm_detail')}}?vmid={{moid}}">查看VM配置</a>
@@ -32,9 +30,11 @@
             <div class="am-u-sm-12">
                 <table class="am-table">
                     <thead>
+                    <tr>
                         <th>项目</th>
                         <th>平均</th>
                         <th>最大</th>
+                    </tr>
                     </thead>
                     <tbody>
                     <tr>

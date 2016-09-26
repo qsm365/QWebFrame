@@ -257,7 +257,7 @@ class SchedulerHistory(db.Model):
             return {
                 'id': self.id,
                 'schedule_id': self.schedule_id,
-                'schedule_name': self.schedule.name,
+                'schedule_name': self.schedule_name,
                 'task_id': self.task_id,
                 'task_name': self.task_name,
                 'date_start': datetime.datetime.strftime(Util.utc2local(self.date_start), '%Y-%m-%d %H:%M:%S'),

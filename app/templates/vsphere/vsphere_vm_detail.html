@@ -3,9 +3,8 @@
     <div class="admin-content-body">
         <div class="am-cf am-padding am-padding-bottom-0">
             <div class="am-fl am-g">
-                <span>
-                    <font size="5">{{vminfo.name}}</font>
-                </span>
+                <strong class="am-text-primary am-text-xl">{{vminfo.name}}</strong>
+
                 <a class="am-btn am-btn-warning am-fr" href="{{url_for('vsphere_performance_detail')}}?type=vm&moid={{vminfo.vmid}}">查看VM性能</a>
             </div>
         </div>

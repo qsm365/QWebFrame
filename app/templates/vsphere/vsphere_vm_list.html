@@ -3,8 +3,17 @@
     <div class="admin-content-body">
         <div class="am-cf am-padding am-padding-bottom-0">
             <div class="am-fl am-cf">
-                <strong class="am-text-primary am-text-lg">{{folder.name}}</strong>
-                <span class="am-badge am-badge-primary">虚拟机数量:{{vms|length}}</span>
+                <table style="display:inline-block;">
+                    <tr>
+                        <td>
+                            <strong class="am-text-primary am-text-xl">{{folder.name}}</strong>
+                        </td>
+                        <td class="am-hide-sm-only">&nbsp</td>
+                        <td class="am-hide-sm-only">
+                            <span class="am-badge am-badge-primary">虚拟机数量:{{vms|length}}</span>
+                        </td>
+                    </tr>
+                </table>
             </div>
         </div>
         <hr>

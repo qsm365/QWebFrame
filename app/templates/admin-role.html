@@ -1,6 +1,7 @@
 {% extends "base_with_sidebar.html" %}
 
 {% block content %}
+
     <div class="admin-content-body">
         <div class="am-cf am-padding am-padding-bottom-0">
             <div class="am-fl am-cf"><strong class="am-text-primary am-text-lg">用户与权限</strong> / <small>权限</small></div>
@@ -80,7 +81,10 @@
         <br>
     </div>
 
-    <div class="am-modal am-modal-alert" tabindex="1" id="errorModal">
+{% endblock %}
+{% block html %}
+
+    <div class="am-modal am-modal-alert" style="z-index: 1501;" tabindex="1" id="errorModal">
         <div class="am-modal-dialog">
             <div class="am-modal-hd">错误</div>
             <div class="am-modal-bd" id="error_msg">
@@ -92,7 +96,7 @@
         </div>
     </div>
 
-    <div class="am-modal" id="createRoleModal">
+    <div class="am-modal" style="z-index: 1501;" id="createRoleModal">
         <div class="am-modal-dialog" style="z-index: 101;">
             <div class="am-modal-hd">创建角色
             <a href="javascript: void(0)" class="am-close am-close-spin" data-am-modal-close>&times;</a>
@@ -117,9 +121,7 @@
         </div>
     </div>
 
-
-
-    <div class="am-modal" tabindex="1" id="createPrivilegeModal">
+    <div class="am-modal" style="z-index: 1501;" tabindex="1" id="createPrivilegeModal">
         <div class="am-modal-dialog">
             <div class="am-modal-hd">创建权限
             <a href="javascript: void(0)" class="am-close am-close-spin" data-am-modal-close>&times;</a>
@@ -146,8 +148,7 @@
         </div>
     </div>
 
-
-    <div class="am-modal" tabindex="1" id="editRoleModal">
+    <div class="am-modal" style="z-index: 1501;" tabindex="1" id="editRoleModal">
         <div class="am-modal-dialog">
             <div class="am-modal-hd">编辑角色
             <a href="javascript: void(0)" class="am-close am-close-spin" data-am-modal-close>&times;</a>
@@ -175,8 +176,7 @@
         </div>
     </div>
 
-
-    <div class="am-modal" tabindex="1" id="editPrivilegeModal">
+    <div class="am-modal" style="z-index: 1501;" tabindex="1" id="editPrivilegeModal">
         <div class="am-modal-dialog">
             <div class="am-modal-hd">编辑角色
             <a href="javascript: void(0)" class="am-close am-close-spin" data-am-modal-close>&times;</a>
@@ -224,8 +224,7 @@
             $("#createRoleName").val('');
             $("#createRoleAlias").val('');
             $("#createRoleModal").modal({
-                width: 400,
-                dimmer:false
+                width: 300
             });
         });
 
@@ -245,8 +244,7 @@
             $("#createPrivilegeName").val('');
             $("#createPrivilegeAlias").val('');
             $("#createPrivilegeModal").modal({
-                width: 400,
-                dimmer:false
+                width: 300
             });
         });
 
@@ -285,9 +283,7 @@
                 //call failed
                 console.log("error");
                 $("#error_msg").html("网络连接异常，请稍后重试。");
-                $("#errorModal").modal({
-                    dimmer:false
-                });
+                $("#errorModal").modal("toggle");
             }
         });
     }
@@ -314,9 +310,7 @@
                 //call failed
                 console.log("error");
                 $("#error_msg").html("网络连接异常，请稍后重试。");
-                $("#errorModal").modal({
-                    dimmer:false
-                });
+                $("#errorModal").modal("toggle");
             }
         });
     }
@@ -359,9 +353,7 @@
                 //call failed
                 console.log("error");
                 $("#error_msg").html("网络连接异常，请稍后重试。");
-                $("#errorModal").modal({
-                    dimmer:false
-                });
+                $("#errorModal").modal("toggle");
             }
         });
     }
@@ -402,9 +394,7 @@
                 //call failed
                 console.log("error");
                 $("#error_msg").html("网络连接异常，请稍后重试。");
-                $("#errorModal").modal({
-                    dimmer:false
-                });
+                $("#errorModal").modal("toggle");
             }
         });
     }
@@ -457,9 +447,7 @@
                 //call failed
                 console.log("error");
                 $("#error_msg").html("网络连接异常，请稍后重试。");
-                $("#errorModal").modal({
-                    dimmer:false
-                });
+                $("#errorModal").modal("toggle");
             }
         });
     }
@@ -481,8 +469,7 @@
             $('#editRoleName').val(role_name);
             $('#editRoleAlias').val(role_alias);
             $("#editRoleModal").modal({
-                width: 400,
-                dimmer:false
+                width: 300
             })
         });
         $(".role-delete").click(function(){
@@ -503,8 +490,7 @@
             $('#editPrivilegeName').val(privilege_name);
             $('#editPrivilegeAlias').val(privilege_alias);
             $("#editPrivilegeModal").modal({
-                width: 400,
-                dimmer:false
+                width: 300
             })
         });
         $(".privilege-delete").click(function(){
@@ -579,9 +565,7 @@
                 //call failed
                 console.log("error");
                 $("#error_msg").html("网络连接异常，请稍后重试。");
-                $("#errorModal").modal({
-                    dimmer:false
-                });
+                $("#errorModal").modal("toggle");
             }
         });
     }
@@ -604,9 +588,7 @@
                 //call failed
                 console.log("error");
                 $("#error_msg").html("网络连接异常，请稍后重试。");
-                $("#errorModal").modal({
-                    dimmer:false
-                });
+                $("#errorModal").modal("toggle");
             }
         });
     }
@@ -629,9 +611,7 @@
                 //call failed
                 console.log("error");
                 $("#error_msg").html("网络连接异常，请稍后重试。");
-                $("#errorModal").modal({
-                    dimmer:false
-                });
+                $("#errorModal").modal("toggle");
             }
         });
     }
@@ -654,9 +634,7 @@
                 //call failed
                 console.log("error");
                 $("#error_msg").html("网络连接异常，请稍后重试。");
-                $("#errorModal").modal({
-                    dimmer:false
-                });
+                $("#errorModal").modal("toggle");
             }
         });
     }
@@ -679,9 +657,7 @@
                 //call failed
                 console.log("error");
                 $("#error_msg").html("网络连接异常，请稍后重试。");
-                $("#errorModal").modal({
-                    dimmer:false
-                });
+                $("#errorModal").modal("toggle");
             }
         });
     }

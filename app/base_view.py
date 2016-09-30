@@ -23,29 +23,11 @@ perPage = 10
 util = Util()
 
 
-
 @app.route('/test', methods=['GET','POST'])
 def test():
-    result = taskPool.test2.delay(1, 2)
-    print result.id
     #result.wait()
-    return 'ok', 200
-
-
-@app.route('/test2', methods=['GET','POST'])
-def test2():
-    res_id = request.values.get('res_id')
-    print res_id
-    result = celery.AsyncResult(res_id)
-    print result.state
-    print result.get(timeout=10)
-    #result.wait()
-    return 'ok', 200
-
-
-@app.route('/test3', methods=['GET','POST'])
-def test3():
-    return jsonify(schedulerService.get_schedule_detail(2))
+    #return render_template('test.html')
+    return "ok", 200
 
 
 @app.route('/login', methods=['GET'])

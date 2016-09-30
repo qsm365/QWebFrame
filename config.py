@@ -15,6 +15,7 @@ CELERY_BROKER_URL = 'redis://192.168.3.13:6379'
 #CELERY_RESULT_BACKEND = 'redis://192.168.3.13:6379'
 #CELERY_TASK_RESULT_EXPIRES = 3600
 CELERY_RESULT_BACKEND = 'db+mysql://testuser:asdf1234@192.168.3.13:3306/testuser'
+CELERY_TASK_RESULT_EXPIRES = 0
 CELERY_RESULT_DB_TABLENAMES = {
     'task': 'celery_taskmeta',
     'group': 'celery_tasksetmeta',

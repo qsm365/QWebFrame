@@ -16,8 +16,22 @@
                 </span>
             </div>
             <div class="am-btn-group am-fr">
-                <a class="am-btn am-btn-warning" href="{{url_for('vsphere_project_map')}}?dcid={{dcinfo.id}}">项目概览</a>
-                <a class="am-btn am-btn-warning" href="{{url_for('vsphere_vm_map')}}?dcid={{dcinfo.id}}">虚机概览</a>
+                <a class="am-btn am-btn-warning" href="{{url_for('vsphere_project_map')}}?dcid={{dcinfo.id}}">
+                    <table>
+                        <tr>
+                            <td>项目</td>
+                            <td class="am-hide-sm-only">概览</td>
+                        </tr>
+                    </table>
+                </a>
+                <a class="am-btn am-btn-warning" href="{{url_for('vsphere_vm_map')}}?dcid={{dcinfo.id}}">
+                    <table>
+                        <tr>
+                            <td>虚机</td>
+                            <td class="am-hide-sm-only">概览</td>
+                        </tr>
+                    </table>
+                </a>
             </div>
         </div>
         <hr>

@@ -87,9 +87,19 @@ content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
 <!--[if lte IE 8 ]>
 <script src="http://libs.baidu.com/jquery/1.11.1/jquery.min.js"></script>
 <![endif]-->
+<script language="javascript" src="{{ url_for('static', filename='assets/js/vue.js') }}"></script>
+
 <script src="{{ url_for('static', filename='assets/js/amazeui.min.js') }}"></script>
 
 <script src="{{ url_for('static', filename='assets/js/app.js') }}"></script>
+
+<script language="JavaScript">
+    // ES6 模板字符串
+    Vue.config.delimiters = ['${', '}']
+    // 修改文本插值的定界符。
+    Vue.config.unsafeDelimiters = ['{!!', '!!}']
+    // 修改原生 HTML 插值的定界符。
+</script>
 
 {% block js %}
 

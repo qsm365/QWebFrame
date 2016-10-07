@@ -16,16 +16,16 @@
                     <div class="am-tabs-bd">
                         <div class="am-tab-panel am-active" id="tab1">
                             <div class="am-input-group am-u-lg-3 am-u-sm-6">
-                                <input id="login_date" type="text" class="am-form-field" placeholder="选择日期" data-am-datepicker="{theme: 'default'}" readonly>
+                                <input id="login_date" type="text" class="am-form-field" placeholder="选择日期" data-am-datepicker="{theme: 'default'}" v-model="startAt" readonly>
                                 <span class="am-input-group-btn">
-                                    <button id="calendar" class="am-btn am-btn-default" type="button"><span class="am-icon-calendar"></span> </button>
+                                    <button id="calendar" class="am-btn am-btn-default" type="button" v-on:click="filter"><span class="am-icon-calendar"></span> </button>
                                 </span>
                             </div>
 
                             <div class="am-input-group am-u-lg-3 am-u-sm-6">
-                                <input id="query" type="text" class="am-form-field" placeholder="名称">
+                                <input id="query" type="text" class="am-form-field" placeholder="名称" v-model="query">
                                 <span class="am-input-group-btn">
-                                    <button id="filter" class="am-btn am-btn-default" type="button"><span class="am-icon-search"></span> </button>
+                                    <button id="filter" class="am-btn am-btn-default" type="button" v-on:click="filter"><span class="am-icon-search"></span> </button>
                                 </span>
                             </div>
 
@@ -41,65 +41,83 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-
+                                    <template v-for="(key, line) in hislist">
+                                        <tr>
+                                        <td class="am-hide-sm-only schedule_name">${line.schedule_name}</td>
+                                        <td class="am-hide-sm-only schedule_id">${line.schedule_id}</td>
+                                        <td class="task_name">${line.task_name}</td>
+                                        <td class="date_start">${line.date_start}</td>
+                                        <td class="am-hide-sm-only date_done">${line.date_done}</td>
+                                        <td class="">
+                                           <a class="status" href="#" v-on:click="show" v-bind:value="key">${line.status}</a>
+                                        </td>
+                                        </tr>
+                                    </template>
                                 </tbody>
                             </table>
                             <div class="am-cf">
-                                共 <span id="total">0</span> 条记录
+                                共 <span id="total">${total}</span> 条记录
                                 <div class="am-fr" id="paging">
+                                    <ul class="am-pagination">
+                                        <li v-bind:class="{ 'am-disabled': !hasPre}"><a id="pre" href="#" v-on:click="prev">«</a></li>
+                                        <template v-for="pagenum in pagenums">
+                                            <li v-bind:class="{ 'am-active': now==pagenum}"><a class="paging" href="#" v-on:click="go">${pagenum}</a></li>
+                                        </template>
+                                        <li v-bind:class="{ 'am-disabled': !hasNext}"><a id="next" href="#" v-on:click="next">»</a></li>
+                                    </ul>
                                 </div>
                             </div>
                         </div>
                         <div class="am-tab-panel" id="tab2">
-                            <div id="pad">
+                            <div id="pad" v-show="!showDetail">
                                 <br>
                                 请先选择记录...
                                 <br>
                                 <br>
                             </div>
-                            <div id="detail">
-                                <h3 id="selected_task"></h3>
+                            <div id="detail" v-show="showDetail">
+                                <h3 id="selected_task">计划任务[ID:${id}]的详细信息:</h3>
                                 <table class="am-table am-table-bordered am-table-radius am-table-striped am-table-centered" id="rp_list">
                                     <tbody>
                                         <tr>
                                             <td>计划名称</td>
-                                            <td id="schedule_name"></td>
+                                            <td id="schedule_name">${schedule_name}</td>
                                         </tr>
                                         <tr>
                                             <td>计划ID</td>
-                                            <td id="schedule_id"></td>
+                                            <td id="schedule_id">${schedule_id}</td>
                                         </tr>
                                         <tr>
                                             <td>任务名称</td>
-                                            <td id="task_name"></td>
+                                            <td id="task_name">${task_name}</td>
                                         </tr>
                                         <tr>
                                             <td>开始时间</td>
-                                            <td id="date_start"></td>
+                                            <td id="date_start">${date_start}</td>
                                         </tr>
                                         <tr>
                                             <td>结束时间</td>
-                                            <td id="date_done"></td>
+                                            <td id="date_done">${date_done}</td>
                                         </tr>
                                         <tr>
                                             <td>状态</td>
-                                            <td id="status"></td>
+                                            <td id="status">${status}</td>
                                         </tr>
                                         <tr>
                                             <td>参数(args)</td>
-                                            <td id="args"></td>
+                                            <td id="args">${args}</td>
                                         </tr>
                                         <tr>
                                             <td>参数(kwargs)</td>
-                                            <td id="kwargs"></td>
+                                            <td id="kwargs">${kwargs}</td>
                                         </tr>
                                         <tr>
                                             <td>返回值</td>
-                                            <td id="result"></td>
+                                            <td id="result">${result}</td>
                                         </tr>
                                         <tr>
                                             <td>Traceback</td>
-                                            <td><pre id="traceback" class="am-pre-scrollable am-text-left"></pre></td>
+                                            <td><pre id="traceback" class="am-pre-scrollable am-text-left">${traceback}</pre></td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -132,59 +150,95 @@
 
 {% block js %}
 <script language="JavaScript">
-    now = 1;
-    query = '';
-    startAt = '';
+
+    data1 = {
+        query: '',
+        startAt: '',
+        hislist: [],
+        total: 0,
+        pagenums: [],
+        hasPre: true,
+        hasNext: true,
+        now: 1
+    }
+    new Vue({
+        el: '#tab1',
+        data: data1,
+        methods: {
+            prev: function(event){
+                load_his_list(this.now*1-1);
+            },
+            go: function(event){
+                load_his_list(event.target.innerHTML);
+            },
+            next: function(event){
+                load_his_list(this.now*1+1);
+            },
+            filter: function(event){
+                load_his_list(this.now);
+            },
+            show: function(event){
+                id = $(event.target).attr("value")
+                data2.id = data1.hislist[id].id;
+                data2.schedule_name = data1.hislist[id].schedule_name;
+                data2.schedule_id = data1.hislist[id].schedule_id;
+                data2.task_name = data1.hislist[id].task_name;
+                data2.date_start = data1.hislist[id].date_start;
+                data2.date_done = data1.hislist[id].date_done;
+                data2.status = data1.hislist[id].status;
+                data2.showDetail = true;
+                $("#tabs").tabs('open',1);
+                load_detail()
+            }
+        }
+    })
+
+    data2 = {
+        id: 0,
+        schedule_name: '',
+        schedule_id: '',
+        task_name: '',
+        date_start: '',
+        date_done: '',
+        status: '',
+        args: '',
+        kwargs: '',
+        result: '',
+        traceback: '',
+        showDetail: false
+    }
+    new Vue({
+        el: '#tab2',
+        data: data2,
+    })
+
+
     $(document).ready(function() {
 
         //手工展开对应的主菜单
         $("#sub-menu-task").collapse('open')
 
-        $("#detail").hide()
-
-        $('#calendar').click(function(){
-            startAt = $('#login_date').val()
-            load_his_list(now,query,startAt);
-        })
-
-        $('#filter').click(function(){
-            query = $('#query').val()
-            load_his_list(now,query,startAt);
-        })
-
-        load_his_list(now,query,startAt);
+        load_his_list(data1.now);
     });
-    function load_his_list(p,query,startAt){
-        now = p;
+    function load_his_list(p){
+        data1.now = p;
         $.AMUI.progress.start();
-        console.log("start load user list");
+        console.log("start load task his list");
         jQuery.ajax({
             url: "{{url_for('task_his__his')}}",
             dataType: "json",
-            data: {"p": p ,"query": query ,"startAt":startAt},
+            data: {"p": p ,"query": data1.query ,"startAt":data1.startAt},
             type: "GET",
             timeout : timeout,
             success: function(response) {
                 $.AMUI.progress.done();
                 console.log(response);
-                $("#total").html(response.data.total);
+                data1.total = response.data.total;
                 paging(response.data.prevNum, response.data.nextNum, response.data.total, response.data.perPage)
-                $("#task_his_list tbody").empty();
+                data1.hislist = []
                 response.data.hisList.forEach(function(e){
-                    var raw = $('<tr>'+
-                                '<td class="am-hide-sm-only schedule_name">'+e.schedule_name+'</td>'+
-                                '<td class="am-hide-sm-only schedule_id">'+e.schedule_id+'</td>'+
-                                '<td class="task_name">'+e.task_name+'</td>'+
-                                '<td class="date_start">'+e.date_start+'</td>'+
-                                '<td class="am-hide-sm-only date_done">'+e.date_done+'</td>'+
-                                '<td class="">'+
-                                '   <input class="id" value="'+e.id+'" type="hidden"/>'+
-                                '   <a class="status" href="#">'+e.status+'</a>'+
-                                '</td>'+
-                                '</tr>')
-                    $("#task_his_list tbody").append(raw)
+                    data1.hislist.push(e);
                 });
-                activeClickEvent();
             },
             error: function(XMLHttpRequest, textStatus, errorThrown) {
                 $.AMUI.progress.done();
@@ -197,88 +251,35 @@
     }
     function paging(prevNum, nextNum, total, perPage){
         totalPage = Math.ceil(total/perPage)
-        console.log(totalPage)
-        var paging = $('<ul class="am-pagination"></ul>')
-        if(prevNum>0){
-            paging.append('<li><a id="pre" href="#">«</a></li>')
-        }else{
-            paging.append('<li class="am-disabled"><a id="pre" href="#">«</a></li>')
-        }
+        data1.hasPre = prevNum>0;
+        data1.hasNext = nextNum<=totalPage;
 
-        offset = now - 2
+        offset = data1.now - 2
         offset = offset<(totalPage-4)?offset:(totalPage-4)
         offset = offset>0?offset:1
         showTotal = 5>totalPage?totalPage:5
+        data1.pagenums = [];
         for(var i=offset;i<offset+showTotal;i++){
-            if(i==now){
-                paging.append('<li class="am-active"><a class="paging" href="#">'+i+'</a></li>')
-            }else{
-                paging.append('<li><a class="paging" href="#">'+i+'</a></li>')
-            }
+            data1.pagenums.push(i);
         }
-
-        if(nextNum<=totalPage){
-            paging.append('<li><a id="next" href="#">»</a></li>')
-        }else{
-            paging.append('<li class="am-disabled"><a id="next" href="#">»</a></li>')
-        }
-        $("#paging").html(paging)
     }
-    function activeClickEvent(){
-        $('#pre').click(function(){
-            console.log('pre')
-            load_his_list(now*1-1,query,startAt);
-        });
-        $('.paging').click(function(){
-            console.log('paging')
-            load_his_list($(this).html(),query,startAt);
-        });
-        $('#next').click(function(){
-            console.log('next')
-            load_his_list(now*1+1,query,startAt);
-        });
-        $('.status').click(function(){
-            id = $(this).parent().children('.id').val()
-            schedule_name = $(this).parent().parent().children('.schedule_name').html()
-            schedule_id = $(this).parent().parent().children('.schedule_id').html()
-            task_name = $(this).parent().parent().children('.task_name').html()
-            date_start = $(this).parent().parent().children('.date_start').html()
-            date_done = $(this).parent().parent().children('.date_done').html()
-            status = $(this).html()
-
-            $("#pad").hide()
-
-            $("#detail").show()
-
-            $("#tabs").tabs('open',1);
-            $("#selected_task").html("计划任务[ID:"+id+"]的详细信息:");
-            $("#schedule_name").html(schedule_name)
-            $("#schedule_id").html(schedule_id)
-            $("#task_name").html(task_name)
-            $("#date_start").html(date_start)
-            $("#date_done").html(date_done)
-            $("#status").html(status)
-
-            load_detail(id)
-        });
-    }
-    function load_detail(id){
+    function load_detail(){
         $.AMUI.progress.start();
         console.log("start load user list");
         jQuery.ajax({
             url: "{{url_for('task_his__his')}}",
             dataType: "json",
-            data: {"id": id},
+            data: {"id": data2.id},
             type: "GET",
             timeout : timeout,
             success: function(response) {
                 $.AMUI.progress.done();
                 console.log(response);
                 if(response.result==1){
-                    $("#args").html(response.data.args)
-                    $("#kwargs").html(response.data.kwargs)
-                    $("#result").html(response.data.result)
-                    $("#traceback").html(response.data.traceback)
+                    data2.args = response.data.args;
+                    data2.kwargs = response.data.kwargs;
+                    data2.result = response.data.result;
+                    data2.traceback = response.data.traceback;
                 }else{
                     $("#error_msg").html("没有找到记录。");
                     $("#errorModal").modal("toggle");

@@ -22,19 +22,19 @@
         </div>
         <hr>
         <div class="am-g">
-            <div class="am-u-sm-12">
+            <div class="am-u-sm-12" id="v-login-his">
 
                 <div class="am-input-group am-u-lg-3 am-u-sm-6">
-                    <input id="login_date" type="text" class="am-form-field" placeholder="选择日期" data-am-datepicker="{theme: 'default'}" readonly>
+                    <input id="login_date" type="text" class="am-form-field" placeholder="选择日期" data-am-datepicker="{theme: 'default'}" v-model="loginAt" readonly>
                     <span class="am-input-group-btn">
-                        <button id="calendar" class="am-btn am-btn-default" type="button"><span class="am-icon-calendar"></span> </button>
+                        <button id="calendar" class="am-btn am-btn-default" type="button" v-on:click="filter"><span class="am-icon-calendar"></span> </button>
                     </span>
                 </div>
 
                 <div class="am-input-group am-u-lg-3 am-u-sm-6">
-                    <input id="query" type="text" class="am-form-field" placeholder="用户名或IP">
+                    <input id="query" type="text" class="am-form-field" placeholder="用户名或IP" v-model="query">
                     <span class="am-input-group-btn">
-                        <button id="filter" class="am-btn am-btn-default" type="button"><span class="am-icon-search"></span> </button>
+                        <button id="filter" class="am-btn am-btn-default" type="button" v-on:click="filter"><span class="am-icon-search"></span> </button>
                     </span>
                 </div>
 
@@ -48,12 +48,26 @@
                     </tr>
                     </thead>
                     <tbody>
-
+                    <template v-for="line in hislist">
+                        <tr>
+                            <td class="am-hide-sm-only">${line.id}</td>
+                            <td>${line.name}</td>
+                            <td>${line.login_at}</td>
+                            <td>${line.login_ip}</td>
+                        </tr>
+                    </template>
                     </tbody>
                 </table>
                 <div class="am-cf">
-                    共 <span id="total">0</span> 条记录
+                    共 <span id="total">${total}</span> 条记录
                     <div class="am-fr" id="paging">
+                        <ul class="am-pagination">
+                            <li v-bind:class="{ 'am-disabled': !hasPre}"><a id="pre" href="#" v-on:click="prev">«</a></li>
+                            <template v-for="pagenum in pagenums">
+                                <li v-bind:class="{ 'am-active': now==pagenum}"><a class="paging" href="#" v-on:click="go">${pagenum}</a></li>
+                            </template>
+                            <li v-bind:class="{ 'am-disabled': !hasNext}"><a id="next" href="#" v-on:click="next">»</a></li>
+                        </ul>
                     </div>
                 </div>
             </div>
@@ -81,53 +95,63 @@
 
 {% block js %}
 <script language="JavaScript">
-    now = 1;
-    query = '';
-    loginAt = '';
+
+    data = {
+        query: '',
+        loginAt: '',
+        hislist: [],
+        total: 0,
+        pagenums: [],
+        hasPre: true,
+        hasNext: true,
+        now: 1
+    }
+    new Vue({
+        el: '#v-login-his',
+        data: data,
+        methods: {
+            prev: function(event){
+                load_his_list(this.now*1-1);
+            },
+            go: function(event){
+                load_his_list(event.target.innerHTML);
+            },
+            next: function(event){
+                load_his_list(this.now*1+1);
+            },
+            filter: function(event){
+                load_his_list(this.now);
+            }
+        }
+    })
+
     $(document).ready(function() {
 
         //手工展开对应的主菜单
         $("#sub-menu-user").collapse('open')
 
-        $('#calendar').click(function(){
-            loginAt = $('#login_date').val()
-            load_his_list(now,query,loginAt);
-        })
-
-        $('#filter').click(function(){
-            query = $('#query').val()
-            load_his_list(now,query,loginAt);
-        })
-
-        load_his_list(now,query,loginAt);
+        load_his_list(data.now);
 
     });
-    function load_his_list(p,query,loginAt){
-        now = p;
+    function load_his_list(p){
+        data.now = p;
         $.AMUI.progress.start();
         console.log("start load user list");
         jQuery.ajax({
             url: "{{url_for('login_his__his')}}",
             dataType: "json",
-            data: {"p": p ,"query": query ,"loginAt":loginAt},
+            data: {"p": p ,"query": data.query ,"loginAt":data.loginAt},
             type: "GET",
             timeout : timeout,
             success: function(response) {
                 $.AMUI.progress.done();
                 console.log(response);
-                $("#total").html(response.data.total);
+                data.total = response.data.total;
                 paging(response.data.prevNum, response.data.nextNum, response.data.total, response.data.perPage)
-                $("#his_list tbody").empty();
+                data.hislist = []
                 response.data.hisList.forEach(function(e){
-                    var raw = $('<tr>'+
-                        '<td class="am-hide-sm-only">'+e.id+'</td>'+
-                        '<td>'+e.name+'</td>'+
-                        '<td>'+e.login_at+'</td>'+
-                        '<td>'+e.login_ip+'</td>'+
-                        '</tr>')
-                    $("#his_list tbody").append(raw)
+                    data.hislist.push(e);
                 });
-                activeClickEvent();
             },
             error: function(XMLHttpRequest, textStatus, errorThrown) {
                 $.AMUI.progress.done();
@@ -140,46 +164,17 @@
     }
     function paging(prevNum, nextNum, total, perPage){
         totalPage = Math.ceil(total/perPage)
-        console.log(totalPage)
-        var paging = $('<ul class="am-pagination"></ul>')
-        if(prevNum>0){
-            paging.append('<li><a id="pre" href="#">«</a></li>')
-        }else{
-            paging.append('<li class="am-disabled"><a id="pre" href="#">«</a></li>')
-        }
+        data.hasPre = prevNum>0;
+        data.hasNext = nextNum<=totalPage;
 
-        offset = now - 2
+        offset = data.now - 2
         offset = offset<(totalPage-4)?offset:(totalPage-4)
         offset = offset>0?offset:1
         showTotal = 5>totalPage?totalPage:5
+        data.pagenums = [];
         for(var i=offset;i<offset+showTotal;i++){
-            if(i==now){
-                paging.append('<li class="am-active"><a class="paging" href="#">'+i+'</a></li>')
-            }else{
-                paging.append('<li><a class="paging" href="#">'+i+'</a></li>')
-            }
+            data.pagenums.push(i);
         }
-
-        if(nextNum<=totalPage){
-            paging.append('<li><a id="next" href="#">»</a></li>')
-        }else{
-            paging.append('<li class="am-disabled"><a id="next" href="#">»</a></li>')
-        }
-        $("#paging").html(paging)
-    }
-    function activeClickEvent(){
-        $('#pre').click(function(){
-            console.log('pre')
-            load_his_list(now*1-1,query,loginAt);
-        })
-        $('.paging').click(function(){
-            console.log('paging')
-            load_his_list($(this).html(),query,loginAt);
-        })
-        $('#next').click(function(){
-            console.log('next')
-            load_his_list(now*1+1,query,loginAt);
-        })
     }
 </script>
 {% endblock %}

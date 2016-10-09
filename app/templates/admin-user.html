@@ -50,102 +50,123 @@
 {% endblock %}
 {% block html %}
 
-    <div class="am-modal am-modal-alert" style="z-index: 1501;" tabindex="-1" id="errorModal">
-        <div class="am-modal-dialog">
-            <div class="am-modal-hd">错误</div>
-            <div class="am-modal-bd" id="error_msg">
-
-            </div>
-            <div class="am-modal-footer">
-                <span class="am-modal-btn">确定</span>
-            </div>
-        </div>
+    <div id="errorModal">
+        <dialog v-bind:show.sync="show">
+            <span slot="header">错误</span>
+            <span slot="body">${msg}</span>
+            <span slot="footer"><span class="am-modal-btn" @click="close">确定</span></span>
+        </dialog>
     </div>
 
-    <div class="am-modal" style="z-index: 1501;" tabindex="1" id="editUserModal">
-        <div class="am-modal-dialog">
-            <div class="am-modal-hd">编辑用户
-            <a href="javascript: void(0)" class="am-close am-close-spin" data-am-modal-close>&times;</a>
-            </div>
-            <form id="editUserForm" action="" class="am-form">
-            <div class="am-modal-bd">
-                <fieldset>
-                        <div class="am-form-group">
-                            <input type="text" id="editUserName" minlength="3"
-                                   disabled="disabled"/>
-                        </div>
-                        <div class="am-form-group">
-                            <input type="password" id="editUserPassword"
-                                   placeholder="输入用户新密码，不输入则不修改"/>
-                        </div>
-                        <div class="am-form-group">
-                            <input type="password" id="editUserPassword2" data-equal-to="#editUserPassword"
-                                   placeholder="重复用户新密码"/>
-                        </div>
-                        <div class="am-form-group">
-                            <input type="email" id="editUserEmail" data-foolish-msg="请输入正确的用户邮箱"
-                                   placeholder="输入用户新邮箱，不输入则不修改"/>
-                        </div>
-                        <div class="am-form-group">
-                            <select id="editRoleId" required>
-                                <option value="">选择角色</option>
-                            </select>
-                            <span class="am-form-caret"></span>
-                        </div>
-                        <div class="am-form-group am-u-sm-4">
-                            <label class="am-checkbox">
-                                <input id="editUserActive" type="checkbox" checked="checked" value="" data-am-ucheck> 激活
-                            </label>
-                        </div>
-                </fieldset>
-                <input type="hidden" id="editUserId"/>
-                <button class="am-btn am-btn-default" type="submit">确定</button>
-            </div>
-            </form>
-        </div>
+    <div id="editUserModal">
+        <form id="editUserForm" name="editUserForm" action="" class="am-form" data-am-validator>
+            <dialog v-bind:show.sync="show">
+                <span slot="header">编辑用户</span>
+                <div slot="body">
+                    <fieldset>
+                            <div class="am-form-group">
+                                <input type="text" minlength="3" value="${editUserName}"
+                                       disabled="disabled"/>
+                            </div>
+                            <div class="am-form-group">
+                                <input type="password" id="editUserPassword"
+                                       placeholder="输入用户新密码，不输入则不修改"
+                                       v-model="editUserPassword"
+                                />
+                            </div>
+                            <div class="am-form-group">
+                                <input type="password" data-equal-to="#editUserPassword"
+                                       placeholder="重复用户新密码"/>
+                            </div>
+                            <div class="am-form-group">
+                                <input type="email" data-foolish-msg="请输入正确的用户邮箱"
+                                       placeholder="输入用户新邮箱，不输入则不修改"
+                                       v-model="editUserEmail"
+                                />
+                            </div>
+                            <div class="am-form-group">
+                                <select required v-model="editRoleId">
+                                    <option value="">选择角色</option>
+                                    <option v-for="role in roles" value="${role.id}">${role.alias}</option>
+                                </select>
+                                <span class="am-form-caret"></span>
+                            </div>
+                            <div class="am-form-group am-u-sm-3">
+                                <label class="am-checkbox">
+                                    <input type="checkbox" data-am-ucheck v-model="editUserActive">激活
+                                </label>
+                            </div>
+                    </fieldset>
+                </div>
+                <span slot="footer">
+                    <button class="am-btn am-btn-link" type="submit">确定</button>
+                </span>
+            </dialog>
+        </form>
     </div>
 
-    <div class="am-modal" style="z-index: 1501;" tabindex="1" id="createUserModal">
-        <div class="am-modal-dialog">
-            <div class="am-modal-hd">创建用户
-            <a href="javascript: void(0)" class="am-close am-close-spin" data-am-modal-close>&times;</a>
-            </div>
-            <form id="createUserForm" action="" class="am-form">
-            <div class="am-modal-bd">
+    <div id="createUserModal">
+        <form id="createUserForm" action="" class="am-form">
+            <dialog v-bind:show.sync="show">
+                <span slot="header">创建用户</span>
+                <div slot="body">
                     <fieldset>
                         <div class="am-form-group">
-                            <input type="text" id="createUserName" minlength="3"
+                            <input type="text" minlength="3" v-model="createUserName"
                                    placeholder="输入用户名" required/>
                         </div>
                         <div class="am-form-group">
-                            <input type="password" id="createUserPassword" minlength="6"
+                            <input type="password" id="createUserPassword" minlength="6" v-model="createUserPassword"
                                    placeholder="输入用户密码" required/>
                         </div>
                         <div class="am-form-group">
-                            <input type="password" id="createUserPassword2" minlength="6" data-equal-to="#createUserPassword"
+                            <input type="password" minlength="6" data-equal-to="#createUserPassword"
                                    placeholder="重复用户密码" required/>
                         </div>
                         <div class="am-form-group">
-                            <input type="email" id="createUserEmail" minlength="3" data-foolish-msg="请输入正确的用户邮箱"
+                            <input type="email" minlength="3" data-foolish-msg="请输入正确的用户邮箱" v-model="createUserEmail"
                                    placeholder="输入用户邮箱" required/>
                         </div>
                         <div class="am-form-group">
-                            <select id="createRoleId" required>
+                            <select v-model="createRoleId" required>
                                 <option value="">选择角色</option>
+                                <option v-for="role in roles" value="${role.id}">${role.alias}</option>
                             </select>
                             <span class="am-form-caret"></span>
                         </div>
-                        <div class="am-form-group am-u-sm-4">
+                        <div class="am-form-group am-u-sm-3">
                             <label class="am-checkbox">
-                                <input id="createUserActive" type="checkbox" checked="checked" value="" data-am-ucheck> 激活
+                                <input v-model="createUserActive" type="checkbox" data-am-ucheck>激活
                             </label>
                         </div>
                     </fieldset>
-                    <button class="am-btn am-btn-default" type="submit">确定</button>
-            </div>
-            </form>
-        </div>
+                </div>
+                <span slot="footer">
+                    <button class="am-btn am-btn-link" type="submit">确定</button>
+                </span>
+            </dialog>
+        </form>
     </div>
+
+    <template id="dialog">
+        <div>
+            <div class="am-modal am-modal-alert" v-bind:class="{ 'am-modal-active': show }" tabindex="-1" v-if="show" style="display:block;">
+                <div class="am-modal-dialog">
+                    <div class="am-modal-hd">
+                        <slot name="header"></slot>
+                        <a href="javascript: void(0)" class="am-close am-close-spin" data-am-modal-close @click="close">&times;</a>
+                    </div>
+                    <div class="am-modal-bd">
+                        <slot name="body"></slot>
+                    </div>
+                    <div class="am-modal-footer">
+                        <slot name="footer"></slot>
+                    </div>
+                </div>
+            </div>
+            <div class="am-dimmer" data-am-dimmer v-bind:class="{ 'am-active': show }" v-if="show" style="display:block;"></div>
+        </div>
+    </template>
 
 {% endblock %}
 
@@ -158,6 +179,71 @@
 <script language="JavaScript">
     now = 1;
     query = '';
+
+    Vue.component('dialog', {
+	    template: '#dialog',
+	    props: {
+	        show:{
+	            type: Boolean,
+	            default: false
+	        }
+	    },
+	    methods: {
+	        close: function() {
+		        this.show = false;
+		    }
+	    }
+	})
+
+	var errorModal = new Vue({
+	    el: '#errorModal',
+	    data: {
+			show: false,
+			msg: ''
+		},
+	    methods: {
+	        close: function() {
+		        this.show = false;
+		    }
+	    }
+	})
+
+	var editUserModal = new Vue({
+	    el: '#editUserModal',
+	    data: {
+			show: false,
+			editUserName: 'test',
+			editUserPassword: '123',
+			editUserEmail: 'test@qq.com',
+			editRoleId: '',
+            editUserActive: true,
+            roles: []
+		},
+	    methods: {
+	        close: function() {
+		        this.show = false;
+		    }
+	    }
+	})
+
+	var createUserModal = new Vue({
+	    el: '#createUserModal',
+	    data: {
+			show: false,
+			createUserName: 'test',
+			createUserPassword: '123',
+			createUserEmail: 'test@qq.com',
+			createRoleId: '',
+            createUserActive: true,
+            roles: []
+		},
+	    methods: {
+	        close: function() {
+		        this.show = false;
+		    }
+	    }
+	})
+
     $(document).ready(function() {
 
         //手工展开对应的主菜单
@@ -186,30 +272,23 @@
             submit: function() {
                 var formValidity = this.isFormValid();
                 if(formValidity ){
-                    if($('#editUserPassword').val()==$('#editUserPassword2').val()){
-                        // 验证成功的逻辑
-                        user_id = $('#editUserId').val();
-                        if($('#editUserPassword').val().length>0){
-                            user_pass = hex_sha1($('#editUserPassword').val());
-                        }else{
-                            user_pass = '';
-                        }
-                        user_email = $('#editUserEmail').val();
-                        role_id = $('#editRoleId').val();
-                        if($('#editUserActive').is(':checked')){
-                            active=1
-                        }else{
-                            active=0
-                        }
-                        console.log("edit user:"+user_id+";"+user_pass+";"+user_email+";"+role_id);
-                        $('#editUserModal').modal('close');
-                        edit_user(user_id, user_pass, user_email, role_id, active);
+                    // 验证成功的逻辑
+                    user_id = $('#editUserId').val();
+                    if($('#editUserPassword').val().length>0){
+                        user_pass = hex_sha1($('#editUserPassword').val());
                     }else{
-                        $('#editUserPassword2').removeClass('am-field-valid');
-                        $('#editUserPassword2').parent().removeClass('am-form-success');
-                        $('#editUserPassword2').addClass('am-field-error');
-                        $('#editUserPassword2').parent().addClass('am-form-error');
+                        user_pass = '';
                     }
+                    user_email = $('#editUserEmail').val();
+                    role_id = $('#editRoleId').val();
+                    if($('#editUserActive').is(':checked')){
+                        active=1
+                    }else{
+                        active=0
+                    }
+                    console.log("edit user:"+user_id+";"+user_pass+";"+user_email+";"+role_id);
+                    $('#editUserModal').modal('close');
+                    edit_user(user_id, user_pass, user_email, role_id, active);
                 }
                 return false;
             }
@@ -357,10 +436,12 @@
             success: function(response) {
                 console.log(response);
                 response.data.forEach(function(e){
-                    var row = $('<option value="'+e.id+'">'+e.alias+'</option>');
-                    $("#editRoleId").append(row);
-                    var row = $('<option value="'+e.id+'">'+e.alias+'</option>');
-                    $("#createRoleId").append(row);
+                    //var row = $('<option value="'+e.id+'">'+e.alias+'</option>');
+                    //$("#editRoleId").append(row);
+                    editUserModal.roles.push(e);
+                    //var row = $('<option value="'+e.id+'">'+e.alias+'</option>');
+                    //$("#createRoleId").append(row);
+                    createUserModal.roles.push(e);
                 });
             },
             error: function(XMLHttpRequest, textStatus, errorThrown) {

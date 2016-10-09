@@ -76,22 +76,27 @@
         <br>
     </div>
 
-    <div id="modals">
+    <div id="errorModal">
         <dialog v-bind:show.sync="show">
-            ${msg}
+            <span slot="header">错误</span>
+            <span slot="body">${msg}</span>
+            <span slot="footer"><span class="am-modal-btn" @click="close">确定</span></span>
         </dialog>
     </div>
 
     <template id="dialog">
         <div>
-            <div class="am-modal am-modal-alert" v-bind:class="{ 'am-modal-active': show }" tabindex="-1" id="errorModal" v-if="show" style="display:block;">
+            <div class="am-modal am-modal-alert" v-bind:class="{ 'am-modal-active': show }" tabindex="-1" v-if="show" style="display:block;">
                 <div class="am-modal-dialog">
-                    <div class="am-modal-hd">错误</div>
-                    <div class="am-modal-bd" id="error_msg">
-                        <slot></slot>
+                    <div class="am-modal-hd">
+                        <slot name="header"></slot>
+                        <a href="javascript: void(0)" class="am-close am-close-spin" data-am-modal-close @click="close">&times;</a>
+                    </div>
+                    <div class="am-modal-bd">
+                        <slot name="body"></slot>
                     </div>
                     <div class="am-modal-footer">
-                        <span class="am-modal-btn" @click="close">确定</span>
+                        <slot name="footer"></slot>
                     </div>
                 </div>
             </div>
@@ -153,12 +158,17 @@
 	    }
 	})
 
-	var modals = new Vue({
-	    el: '#modals',
+	var errorModal = new Vue({
+	    el: '#errorModal',
 	    data: {
 			show: false,
 			msg: ''
-		}
+		},
+	    methods: {
+	        close: function() {
+		        this.show = false;
+		    }
+	    }
 	})
 
     $(document).ready(function() {
@@ -193,8 +203,8 @@
                 $.AMUI.progress.done();
                 //call failed
                 console.log("error");
-                modals.msg='网络连接异常，请稍后重试。';
-                modals.show=true;
+                errorModal.msg='网络连接异常，请稍后重试。';
+                errorModal.show=true;
             }
         });
     }

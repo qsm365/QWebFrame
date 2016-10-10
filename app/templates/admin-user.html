@@ -17,7 +17,7 @@
                 <div class="am-input-group am-u-lg-3 am-u-sm-6">
                     <input id="query" type="text" class="am-form-field" placeholder="用户名或Email" v-model="query">
                     <span class="am-input-group-btn">
-                        <button id="filter" class="am-btn am-btn-default" type="button" v-on:click="filter"><span class="am-icon-search"></span> </button>
+                        <button id="filter" class="am-btn am-btn-default" type="button" @click="filter"><span class="am-icon-search"></span> </button>
                     </span>
                 </div>
 
@@ -45,8 +45,8 @@
                                 <td>
                                     <div class="am-btn-toolbar">
                                         <div class="am-btn-group am-btn-group-xs">
-                                            <button class="am-btn am-btn-default am-btn-xs am-text-secondary" @click="edit" v-bind:value="key"><span class="am-icon-pencil-square-o am-icon-fw"></span> 编辑</button>
-                                            <button class="am-btn am-btn-default am-btn-xs am-text-danger am-hide-sm-only" @click="delete" v-bind:value="key"><span class="am-icon-trash-o am-icon-fw"></span> 删除</button>
+                                            <button class="am-btn am-btn-default am-btn-xs am-text-secondary" @click="edit" v-bind:value="key"><span class="am-icon-pencil-square-o am-icon-fw" v-bind:value="key"></span> 编辑</button>
+                                            <button class="am-btn am-btn-default am-btn-xs am-text-danger am-hide-sm-only" @click="delete" v-bind:value="key"><span class="am-icon-trash-o am-icon-fw" v-bind:value="key"></span> 删除</button>
                                         </div>
                                     </div>
                                 </td>
@@ -84,7 +84,7 @@
     </div>
 
     <div id="editUserModal">
-        <form id="editUserForm" name="editUserForm" action="" class="am-form" data-am-validator>
+        <form id="editUserForm" action="" class="am-form">
             <dialog v-bind:show.sync="show">
                 <span slot="header">编辑用户</span>
                 <div slot="body">
@@ -101,7 +101,9 @@
                             </div>
                             <div class="am-form-group">
                                 <input type="password" data-equal-to="#editUserPassword"
-                                       placeholder="重复用户新密码"/>
+                                       placeholder="重复用户新密码"
+                                       value="${editUserPassword2}"
+                                />
                             </div>
                             <div class="am-form-group">
                                 <input type="email" data-foolish-msg="请输入正确的用户邮箱"
@@ -116,7 +118,7 @@
                                 </select>
                                 <span class="am-form-caret"></span>
                             </div>
-                            <div class="am-form-group am-u-sm-3">
+                            <div class="am-form-group am-u-sm-4">
                                 <label class="am-checkbox">
                                     <input type="checkbox" data-am-ucheck v-model="editUserActive">激活
                                 </label>
@@ -145,7 +147,7 @@
                                    placeholder="输入用户密码" required/>
                         </div>
                         <div class="am-form-group">
-                            <input type="password" minlength="6" data-equal-to="#createUserPassword"
+                            <input type="password" minlength="6" data-equal-to="#createUserPassword" value="${createUserPassword2}"
                                    placeholder="重复用户密码" required/>
                         </div>
                         <div class="am-form-group">
@@ -159,7 +161,7 @@
                             </select>
                             <span class="am-form-caret"></span>
                         </div>
-                        <div class="am-form-group am-u-sm-3">
+                        <div class="am-form-group am-u-sm-4">
                             <label class="am-checkbox">
                                 <input v-model="createUserActive" type="checkbox" data-am-ucheck>激活
                             </label>
@@ -175,8 +177,8 @@
 
     <template id="dialog">
         <div>
-            <div class="am-modal am-modal-alert" v-bind:class="{ 'am-modal-active': show }" tabindex="-1" v-if="show" style="display:block;">
-                <div class="am-modal-dialog">
+            <div class="am-modal am-modal-alert" v-bind:class="{ 'am-modal-active': show }" tabindex="-1" v-if="show" style="display:block;z-index: 1501;">
+                <div class="am-modal-dialog" style="width:400px;">
                     <div class="am-modal-hd">
                         <slot name="header"></slot>
                         <a href="javascript: void(0)" class="am-close am-close-spin" data-am-modal-close @click="close">&times;</a>
@@ -233,7 +235,9 @@
                 id = $(event.target).attr("value")
                 editUserModal.editUserId = data.userlist[id].id
                 editUserModal.editUserName = data.userlist[id].name
-                editUserModal.editUserEmail = data.userlist[id].email
+                editUserModal.editUserPassword = ''
+                editUserModal.editUserPassword2 = ''
+                editUserModal.editUserEmail = ''
                 editUserModal.editRoleId = data.userlist[id].role_id
                 editUserModal.editUserActive = data.userlist[id].active
                 editUserModal.show = true;
@@ -247,6 +251,8 @@
             },
             create: function(event){
                 createUserModal.createUserName = ''
+                createUserModal.createUserPassword = ''
+                createUserModal.createUserPassword2 = ''
                 createUserModal.createUserEmail = ''
                 createUserModal.createRoleId = 0
                 createUserModal.createUserActive = true
@@ -291,6 +297,7 @@
 			editUserId: 0,
 			editUserName: '',
 			editUserPassword: '',
+			editUserPassword2: '',
 			editUserEmail: '',
 			editRoleId: 0,
             editUserActive: true,
@@ -309,6 +316,7 @@
 			show: false,
 			createUserName: '',
 			createUserPassword: '',
+			createUserPassword2: '',
 			createUserEmail: '',
 			createRoleId: 0,
             createUserActive: true,
@@ -335,10 +343,15 @@
                 if(formValidity ){
                     // 验证成功的逻辑
                     user_id = editUserModal.editUserId;
-                    if(editUserModal.editUserPassword.length>0){
+                    if(editUserModal.editUserPassword.length>5){
                         user_pass = hex_sha1(editUserModal.editUserPassword);
-                    }else{
+                    }else if(editUserModal.editUserPassword.length==0){
                         user_pass = '';
+                    }else{
+                        editUserModal.show=false;
+                        errorModal.msg='新密码长度不能小于6位';
+                        errorModal.show=true;
+                        return false;
                     }
                     user_email = editUserModal.editUserEmail;
                     role_id = editUserModal.editRoleId;
@@ -387,13 +400,11 @@
             timeout : timeout,
             success: function(response) {
                 $.AMUI.progress.done();
-                console.log(response);
-                load_user_list(1,'');
+                load_user_list(data.now);
             },
             error: function(XMLHttpRequest, textStatus, errorThrown) {
                 $.AMUI.progress.done();
                 //call failed
-                console.log("error");
                 errorModal.msg='网络连接异常，请稍后重试。';
                 errorModal.show=true;
             }
@@ -410,17 +421,16 @@
             timeout : timeout,
             success: function(response) {
                 $.AMUI.progress.done();
-                console.log(response);
                 if(response.result==2){
-                    alert("已存在同名用户！");
+                    errorModal.msg='已存在同名用户！';
+                    errorModal.show=true;
                 }else{
-                    load_user_list(1,'');
+                    load_user_list(data.now);
                 }
             },
             error: function(XMLHttpRequest, textStatus, errorThrown) {
                 $.AMUI.progress.done();
                 //call failed
-                console.log("error");
                 errorModal.msg='网络连接异常，请稍后重试。';
                 errorModal.show=true;
             }
@@ -464,7 +474,6 @@
             type: "GET",
             timeout : timeout,
             success: function(response) {
-                console.log(response);
                 response.data.forEach(function(e){
                     editUserModal.roles.push(e);
                     createUserModal.roles.push(e);
@@ -472,7 +481,6 @@
             },
             error: function(XMLHttpRequest, textStatus, errorThrown) {
                 //call failed
-                console.log("error");
                 errorModal.msg='网络连接异常，请稍后重试。';
                 errorModal.show=true;
             }
@@ -503,7 +511,6 @@
             timeout : timeout,
             success: function(response) {
                 $.AMUI.progress.done();
-                console.log(response);
                 load_user_list(data.now);
             },
             error: function(XMLHttpRequest, textStatus, errorThrown) {

@@ -1,7 +1,7 @@
 {% extends "base_with_sidebar.html" %}
 
 {% block content %}
-    <div class="admin-content-body">
+    <div class="admin-content-body" id="v-user-center">
         <div class="am-cf am-padding am-padding-bottom-0">
             <div class="am-fl am-cf"><strong class="am-text-primary am-text-lg">用户中心</strong></div>
         </div>
@@ -20,11 +20,11 @@
                 </tr>
                 <tr>
                     <td>密码</td>
-                    <td>******<a class="am-btn am-btn-primary am-btn-sm am-fr" id="btnChangePassword">修改</a></td>
+                    <td>******<a class="am-btn am-btn-primary am-btn-sm am-fr" @click="changePassword">修改</a></td>
                 </tr>
                 <tr>
                     <td>邮箱</td>
-                    <td><span id="email">{{user.email}}</span> <a class="am-btn am-btn-primary am-btn-sm am-fr" id="btnChangeEmail">修改</a></td>
+                    <td><span id="email">{{user.email}}</span> <a class="am-btn am-btn-primary am-btn-sm am-fr" @click="changeEmail">修改</a></td>
                 </tr>
                 <tr>
                     <td>激活</td>
@@ -36,93 +36,172 @@
         </div>
     </div>
 
-{% endblock %}
-{% block html %}
-
-    <div class="am-modal" tabindex="1" style="z-index: 1501;" id="changePasswordModal">
-        <div class="am-modal-dialog">
-            <div class="am-modal-hd">修改密码
-            <a href="javascript: void(0)" class="am-close am-close-spin" data-am-modal-close>&times;</a>
-            </div>
-            <form id="changePasswordForm" action="" class="am-form">
-            <div class="am-modal-bd">
-                <fieldset>
+    <div id="changePasswordModal">
+        <form id="changePasswordForm" action="" class="am-form">
+            <dialog v-bind:show.sync="show">
+                <span slot="header">修改密码</span>
+                <div slot="body">
+                    <fieldset>
                         <div class="am-form-group">
-                            <input type="password" id="changePassword"
+                            <input type="password" id="changePassword" v-model="password" minlength="6"
                                    placeholder="输入新密码"/>
                         </div>
                         <div class="am-form-group">
-                            <input type="password" id="changePassword2" data-equal-to="#changePassword"
+                            <input type="password" data-equal-to="#changePassword" value="${password2}" minlength="6"
                                    placeholder="重复新密码"/>
                         </div>
-                </fieldset>
-                <button class="am-btn am-btn-default" type="submit">确定</button>
-            </div>
-            </form>
-        </div>
+                    </fieldset>
+                </div>
+                <span slot="footer">
+                    <button class="am-btn am-btn-link" type="submit">确定</button>
+                </span>
+                </dialog>
+        </form>
     </div>
 
-    <div class="am-modal" tabindex="1" style="z-index: 1501;" id="changeEmailModal">
-        <div class="am-modal-dialog">
-            <div class="am-modal-hd">修改邮箱
-            <a href="javascript: void(0)" class="am-close am-close-spin" data-am-modal-close>&times;</a>
-            </div>
-            <form id="changeEmailForm" action="" class="am-form">
-            <div class="am-modal-bd">
-                <fieldset>
+    <div id="changeEmailModal">
+        <form id="changeEmailForm" action="" class="am-form">
+            <dialog v-bind:show.sync="show">
+                <span slot="header">修改邮箱</span>
+                <div slot="body">
+                    <fieldset>
                     <div class="am-form-group">
-                        <input type="email" id="changeEmail" data-foolish-msg="请输入正确的用户邮箱"
+                        <input type="email" data-foolish-msg="请输入正确的用户邮箱"  v-model="email" minlength="6"
                                placeholder="输入新邮箱地址"/>
                     </div>
-                </fieldset>
-                <button class="am-btn am-btn-default" type="submit">确定</button>
-            </div>
-            </form>
-        </div>
+                    </fieldset>
+                </div>
+                <span slot="footer">
+                    <button class="am-btn am-btn-link" type="submit">确定</button>
+                </span>
+            </dialog>
+        </form>
     </div>
 
-    <div class="am-modal am-modal-alert" style="z-index: 1501;" tabindex="-1" id="errorModal">
-        <div class="am-modal-dialog">
-            <div class="am-modal-hd">错误</div>
-            <div class="am-modal-bd" id="error_msg">
-
-            </div>
-            <div class="am-modal-footer">
-                <span class="am-modal-btn">确定</span>
-            </div>
-        </div>
+    <div id="errorModal">
+        <dialog v-bind:show.sync="show">
+            <span slot="header">错误</span>
+            <span slot="body">${msg}</span>
+            <span slot="footer"><span class="am-modal-btn" @click="close">确定</span></span>
+        </dialog>
     </div>
+
+    <template id="dialog">
+        <div>
+            <div class="am-modal am-modal-alert" v-bind:class="{ 'am-modal-active': show }" tabindex="-1" v-if="show" style="display:block;z-index: 1501;">
+                <div class="am-modal-dialog" style="width:300px;">
+                    <div class="am-modal-hd">
+                        <slot name="header"></slot>
+                        <a href="javascript: void(0)" class="am-close am-close-spin" data-am-modal-close @click="close">&times;</a>
+                    </div>
+                    <div class="am-modal-bd">
+                        <slot name="body"></slot>
+                    </div>
+                    <div class="am-modal-footer">
+                        <slot name="footer"></slot>
+                    </div>
+                </div>
+            </div>
+            <div class="am-dimmer" data-am-dimmer v-bind:class="{ 'am-active': show }" v-if="show" style="display:block;"></div>
+        </div>
+    </template>
 
 {% endblock %}
 
 {% block js %}
 <script src="{{ url_for('static', filename='assets/js/sha-1.js') }}"></script>
 <script language="JavaScript">
+
+    data = {
+        name: '',
+        userlist: [],
+        total: 0,
+        pagenums: [],
+        hasPre: true,
+        hasNext: true,
+        now: 1
+    }
+
+    new Vue({
+        el: '#v-user-center',
+        data: data,
+        methods: {
+            changePassword: function(event){
+                changePasswordModal.password = '';
+                changePasswordModal.password2 = '';
+                changePasswordModal.show=true;
+            },
+            changeEmail: function(event){
+                changeEmailModal.email = '';
+                changeEmailModal.show=true;
+            }
+        }
+    })
+
+    Vue.component('dialog', {
+	    template: '#dialog',
+	    props: {
+	        show:{
+	            type: Boolean,
+	            default: false
+	        }
+	    },
+	    methods: {
+	        close: function() {
+		        this.show = false;
+		    }
+	    }
+	})
+
+	var errorModal = new Vue({
+	    el: '#errorModal',
+	    data: {
+			show: false,
+			msg: ''
+		},
+	    methods: {
+	        close: function() {
+		        this.show = false;
+		    }
+	    }
+	})
+
+	var changePasswordModal = new Vue({
+	    el: '#changePasswordModal',
+	    data: {
+			show: false,
+			password: '',
+			password2: ''
+		},
+	    methods: {
+	        close: function() {
+		        this.show = false;
+		    }
+	    }
+	})
+
+	var changeEmailModal = new Vue({
+	    el: '#changeEmailModal',
+	    data: {
+			show: false,
+			email: ''
+		},
+	    methods: {
+	        close: function() {
+		        this.show = false;
+		    }
+	    }
+	})
+
     $(document).ready(function() {
-
-        $("#btnChangePassword").click(function(){
-            $("#changePassword").val("");
-            $("#changePassword2").val("");
-            $("#changePasswordModal").modal({
-                width: 300
-            });
-        });
-
-        $("#btnChangeEmail").click(function(){
-            $("#changeEmail").val("");
-            $("#changeEmailModal").modal({
-                width: 300
-            });
-        });
-
 
         $('#changePasswordForm').validator({
             submit: function() {
                 var formValidity = this.isFormValid();
                 if(formValidity ){
                     // 验证成功的逻辑
-                    user_pass = hex_sha1($('#changePassword').val());
-                    $('#changePasswordModal').modal('close');
+                    user_pass = hex_sha1(changePasswordModal.password);
+                    changePasswordModal.show = false;
                     change_password(user_pass);
                 }
                 return false;
@@ -134,8 +213,10 @@
                 var formValidity = this.isFormValid();
                 if(formValidity ){
                     // 验证成功的逻辑
-                    email = $('#changeEmail').val();
-                    $('#changeEmailModal').modal('close');
+                    email = changeEmailModal.email;
+                    console.log(email);
+                    changeEmailModal.show = false;
+                    console.log(email);
                     change_email(email);
                 }
                 return false;
@@ -154,14 +235,12 @@
             timeout : timeout,
             success: function(response) {
                 $.AMUI.progress.done();
-                console.log(response);
             },
             error: function(XMLHttpRequest, textStatus, errorThrown) {
                 $.AMUI.progress.done();
                 //call failed
-                console.log("error");
-                $("#error_msg").html("网络连接异常，请稍后重试。");
-                $("#errorModal").modal("toggle");
+                errorModal.msg='网络连接异常，请稍后重试。';
+                errorModal.show=true;
             }
         });
     }
@@ -177,15 +256,13 @@
             timeout : timeout,
             success: function(response) {
                 $.AMUI.progress.done();
-                console.log(response);
                 $("#email").html(email);
             },
             error: function(XMLHttpRequest, textStatus, errorThrown) {
                 $.AMUI.progress.done();
                 //call failed
-                console.log("error");
-                $("#error_msg").html("网络连接异常，请稍后重试。");
-                $("#errorModal").modal("toggle");
+                errorModal.msg='网络连接异常，请稍后重试。';
+                errorModal.show=true;
             }
         });
     }

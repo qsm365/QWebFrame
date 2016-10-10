@@ -12,6 +12,7 @@ from model.vsphere.version import Version
 from model.vsphere.vm import VM
 from model.vsphere.vmnic import VMNic
 
+import datetime
 from IPy import IP
 
 from sqlalchemy import desc
@@ -73,7 +74,7 @@ class VsphereService:
 
     @staticmethod
     def saveVersion():
-        v = Version()
+        v = Version(synctime=datetime.datetime.now())
         db.session.add(v)
         db.session.commit()
         return v.id

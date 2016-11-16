@@ -18,14 +18,14 @@
                             <div class="am-input-group am-u-lg-3 am-u-sm-6">
                                 <input id="login_date" type="text" class="am-form-field" placeholder="选择日期" data-am-datepicker="{theme: 'default'}" v-model="startAt" readonly>
                                 <span class="am-input-group-btn">
-                                    <button id="calendar" class="am-btn am-btn-default" type="button" v-on:click="filter"><span class="am-icon-calendar"></span> </button>
+                                    <button id="calendar" class="am-btn am-btn-default" type="button" @click="filter"><span class="am-icon-calendar"></span> </button>
                                 </span>
                             </div>
 
                             <div class="am-input-group am-u-lg-3 am-u-sm-6">
                                 <input id="query" type="text" class="am-form-field" placeholder="名称" v-model="query">
                                 <span class="am-input-group-btn">
-                                    <button id="filter" class="am-btn am-btn-default" type="button" v-on:click="filter"><span class="am-icon-search"></span> </button>
+                                    <button id="filter" class="am-btn am-btn-default" type="button" @click="filter"><span class="am-icon-search"></span> </button>
                                 </span>
                             </div>
 
@@ -49,7 +49,7 @@
                                         <td class="date_start">${line.date_start}</td>
                                         <td class="am-hide-sm-only date_done">${line.date_done}</td>
                                         <td class="">
-                                           <a class="status" href="#" v-on:click="show" v-bind:value="key">${line.status}</a>
+                                           <a class="status" href="#" @click="show" v-bind:value="key">${line.status}</a>
                                         </td>
                                         </tr>
                                     </template>
@@ -59,11 +59,11 @@
                                 共 <span id="total">${total}</span> 条记录
                                 <div class="am-fr" id="paging">
                                     <ul class="am-pagination">
-                                        <li v-bind:class="{ 'am-disabled': !hasPre}"><a id="pre" href="#" v-on:click="prev">«</a></li>
+                                        <li v-bind:class="{ 'am-disabled': !hasPre}"><a id="pre" href="#" @click="prev">«</a></li>
                                         <template v-for="pagenum in pagenums">
-                                            <li v-bind:class="{ 'am-active': now==pagenum}"><a class="paging" href="#" v-on:click="go">${pagenum}</a></li>
+                                            <li v-bind:class="{ 'am-active': now==pagenum}"><a class="paging" href="#" @click="go">${pagenum}</a></li>
                                         </template>
-                                        <li v-bind:class="{ 'am-disabled': !hasNext}"><a id="next" href="#" v-on:click="next">»</a></li>
+                                        <li v-bind:class="{ 'am-disabled': !hasNext}"><a id="next" href="#" @click="next">»</a></li>
                                     </ul>
                                 </div>
                             </div>
@@ -131,20 +131,33 @@
         <br>
     </div>
 
-{% endblock %}
-{% block html %}
-
-    <div class="am-modal am-modal-alert" style="z-index: 1501;" tabindex="-1" id="errorModal">
-        <div class="am-modal-dialog">
-            <div class="am-modal-hd">错误</div>
-            <div class="am-modal-bd" id="error_msg">
-
-            </div>
-            <div class="am-modal-footer">
-                <span class="am-modal-btn">确定</span>
-            </div>
-        </div>
+    <div id="errorModal">
+        <dialog v-bind:show.sync="show">
+            <span slot="header">错误</span>
+            <span slot="body">${msg}</span>
+            <span slot="footer"><span class="am-modal-btn" @click="close">确定</span></span>
+        </dialog>
     </div>
+
+    <template id="dialog">
+        <div>
+            <div class="am-modal am-modal-alert" v-bind:class="{ 'am-modal-active': show }" tabindex="-1" v-if="show" style="display:block;">
+                <div class="am-modal-dialog" style="width:300px;">
+                    <div class="am-modal-hd">
+                        <slot name="header"></slot>
+                        <a href="javascript: void(0)" class="am-close am-close-spin" data-am-modal-close @click="close">&times;</a>
+                    </div>
+                    <div class="am-modal-bd">
+                        <slot name="body"></slot>
+                    </div>
+                    <div class="am-modal-footer">
+                        <slot name="footer"></slot>
+                    </div>
+                </div>
+            </div>
+            <div class="am-dimmer" data-am-dimmer v-bind:class="{ 'am-active': show }" v-if="show" style="display:block;"></div>
+        </div>
+    </template>
 
 {% endblock %}
 
@@ -212,6 +225,33 @@
         data: data2,
     })
 
+    Vue.component('dialog', {
+	    template: '#dialog',
+	    props: {
+	        show:{
+	            type: Boolean,
+	            default: false
+	        }
+	    },
+	    methods: {
+	        close: function() {
+		        this.show = false;
+		    }
+	    }
+	})
+
+	var errorModal = new Vue({
+	    el: '#errorModal',
+	    data: {
+			show: false,
+			msg: ''
+		},
+	    methods: {
+	        close: function() {
+		        this.show = false;
+		    }
+	    }
+	})
 
     $(document).ready(function() {
 
@@ -232,7 +272,6 @@
             timeout : timeout,
             success: function(response) {
                 $.AMUI.progress.done();
-                console.log(response);
                 data1.total = response.data.total;
                 paging(response.data.prevNum, response.data.nextNum, response.data.total, response.data.perPage)
                 data1.hislist = []
@@ -243,9 +282,8 @@
             error: function(XMLHttpRequest, textStatus, errorThrown) {
                 $.AMUI.progress.done();
                 //call failed
-                console.log("error");
-                $("#error_msg").html("网络连接异常，请稍后重试。");
-                $("#errorModal").modal("toggle");
+                errorModal.msg='网络连接异常，请稍后重试。';
+                errorModal.show=true;
             }
         });
     }
@@ -274,23 +312,21 @@
             timeout : timeout,
             success: function(response) {
                 $.AMUI.progress.done();
-                console.log(response);
                 if(response.result==1){
                     data2.args = response.data.args;
                     data2.kwargs = response.data.kwargs;
                     data2.result = response.data.result;
                     data2.traceback = response.data.traceback;
                 }else{
-                    $("#error_msg").html("没有找到记录。");
-                    $("#errorModal").modal("toggle");
+                    errorModal.msg='没有找到记录。';
+                    errorModal.show=true;
                 }
             },
             error: function(XMLHttpRequest, textStatus, errorThrown) {
                 $.AMUI.progress.done();
                 //call failed
-                console.log("error");
-                $("#error_msg").html("网络连接异常，请稍后重试。");
-                $("#errorModal").modal("toggle");
+                errorModal.msg='网络连接异常，请稍后重试。';
+                errorModal.show=true;
             }
         });
     }

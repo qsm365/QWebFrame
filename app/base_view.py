@@ -8,6 +8,7 @@ from privilege_service import PrivilegeService
 from login_service import LoginService
 from task_pool import TaskPool
 from scheduler_service import SchedulerService
+from task_service import TaskService
 from util import Util
 from decorator.user import login_required,privilege
 from decorator.task import celery
@@ -19,14 +20,14 @@ privilegeService = PrivilegeService()
 loginService = LoginService()
 taskPool = TaskPool()
 schedulerService = SchedulerService()
+taskService = TaskService()
 perPage = 10
 util = Util()
 
 
 @app.route('/test', methods=['GET','POST'])
 def test():
-    #result.wait()
-    #return render_template('test.html')
+    taskService.add_task()
     return "ok", 200
 
 

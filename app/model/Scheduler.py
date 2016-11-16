@@ -172,7 +172,7 @@ def _set_entry_changed_date(mapper, connection, target):
     target.date_changed = datetime.datetime.utcnow()
 
 
-class Task(db.Model):
+class TaskResult(db.Model):
     """Task result/status."""
     __tablename__ = 'celery_taskmeta'
     __table_args__ = {'sqlite_autoincrement': True}
@@ -201,7 +201,7 @@ class Task(db.Model):
         return '<Task {0.task_id} state: {0.status}>'.format(self)
 
 
-class TaskSet(db.Model):
+class TaskSetResult(db.Model):
     """TaskSet result"""
     __tablename__ = 'celery_tasksetmeta'
     __table_args__ = {'sqlite_autoincrement': True}
@@ -241,7 +241,7 @@ class SchedulerHistory(db.Model):
 
     def serialize(self):
         """Return object data in easily serializeable format"""
-        result = Task.query.filter(Task.task_id == self.task_id).first()
+        result = TaskResult.query.filter(TaskResult.task_id == self.task_id).first()
         if result:
             return {
                 'id': self.id,
@@ -264,3 +264,14 @@ class SchedulerHistory(db.Model):
                 'date_done': None,
                 'status': 'PENDING',
             }
+
+
+class TaskHistory(db.Model):
+    __tablename__ = 'celery_task_history'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255))
+    date_start = db.Column(db.DateTime, default=datetime.datetime.utcnow,
+                           onupdate=datetime.datetime.utcnow, nullable=True)
+    task = db.Column(db.String(255))
+    arguments = db.Column(db.String(255), default='[]')
+    keyword_arguments = db.Column(db.String(255), default='{}')

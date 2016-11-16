@@ -4,9 +4,10 @@ import time
 from sqlalchemy import or_,and_,desc
 
 from model import db
-from model.Scheduler import DatabaseSchedulerEntry,CrontabSchedule,IntervalSchedule,SchedulerHistory,Task
+from model.Scheduler import DatabaseSchedulerEntry,CrontabSchedule,IntervalSchedule,SchedulerHistory,TaskResult
 
 from decorator.task import celery
+
 
 class SchedulerService:
 
@@ -111,7 +112,7 @@ class SchedulerService:
             ret['args'] = sh.arguments
             ret['kwargs'] = sh.keyword_arguments
             task_id = sh.task_id
-            task = Task.query.filter(Task.task_id==task_id).first()
+            task = TaskResult.query.filter(TaskResult.task_id == task_id).first()
             if task:
                 ret['result'] = str(task.result)
                 if task.traceback:

@@ -74,7 +74,7 @@ class UserService:
     @staticmethod
     def check_token(token):
         u = User.query.filter(User.token==token)
-        if u:
+        if u.first():
             return u.first().id
         else:
             return
